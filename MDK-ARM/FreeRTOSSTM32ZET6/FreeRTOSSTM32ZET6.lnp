@@ -3,6 +3,7 @@
 "freertosstm32zet6\main.o"
 "freertosstm32zet6\gpio.o"
 "freertosstm32zet6\freertos.o"
+"freertosstm32zet6\dma.o"
 "freertosstm32zet6\usart.o"
 "freertosstm32zet6\stm32f1xx_it.o"
 "freertosstm32zet6\stm32f1xx_hal_msp.o"

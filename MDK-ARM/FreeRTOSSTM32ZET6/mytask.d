@@ -42,3 +42,4 @@ freertosstm32zet6\mytask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTO
 freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+freertosstm32zet6\mytask.o: ../Core/Inc/gpio.h

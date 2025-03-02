@@ -68,10 +68,22 @@ const osThreadAttr_t LED1Task_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for UART1_recv_Task */
+osThreadId_t UART1_recv_TaskHandle;
+const osThreadAttr_t UART1_recv_Task_attributes = {
+  .name = "UART1_recv_Task",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for uart1_printf_gsem */
 osSemaphoreId_t uart1_printf_gsemHandle;
 const osSemaphoreAttr_t uart1_printf_gsem_attributes = {
   .name = "uart1_printf_gsem"
+};
+/* Definitions for uart1_rxok_gsem */
+osSemaphoreId_t uart1_rxok_gsemHandle;
+const osSemaphoreAttr_t uart1_rxok_gsem_attributes = {
+  .name = "uart1_rxok_gsem"
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -82,6 +94,7 @@ const osSemaphoreAttr_t uart1_printf_gsem_attributes = {
 void StartdefauleTask(void *argument);
 extern void StartLED2TaskFunction(void *argument);
 extern void StartLED1TaskFunction(void *argument);
+extern void StartUART1_recv_TaskFunction(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -102,6 +115,9 @@ void MX_FREERTOS_Init(void) {
   /* Create the semaphores(s) */
   /* creation of uart1_printf_gsem */
   uart1_printf_gsemHandle = osSemaphoreNew(1, 1, &uart1_printf_gsem_attributes);
+
+  /* creation of uart1_rxok_gsem */
+  uart1_rxok_gsemHandle = osSemaphoreNew(1, 1, &uart1_rxok_gsem_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -124,6 +140,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of LED1Task */
   LED1TaskHandle = osThreadNew(StartLED1TaskFunction, NULL, &LED1Task_attributes);
+
+  /* creation of UART1_recv_Task */
+  UART1_recv_TaskHandle = osThreadNew(StartUART1_recv_TaskFunction, NULL, &UART1_recv_Task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

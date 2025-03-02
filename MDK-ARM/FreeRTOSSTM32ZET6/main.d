@@ -39,6 +39,7 @@ freertosstm32zet6\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu
 freertosstm32zet6\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
 freertosstm32zet6\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
 freertosstm32zet6\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+freertosstm32zet6\main.o: ../Core/Inc/dma.h
 freertosstm32zet6\main.o: ../Core/Inc/usart.h
 freertosstm32zet6\main.o: ../Core/Inc/gpio.h
-freertosstm32zet6\main.o: ..\Core\Inc\user\mytask.h
+freertosstm32zet6\main.o: ../Core/Inc/user/mytask.h
