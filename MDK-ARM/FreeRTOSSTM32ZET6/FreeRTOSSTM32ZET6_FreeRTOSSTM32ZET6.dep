@@ -822,7 +822,7 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3/portmacro.h)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h)(0x67BDE618)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/task.h)(0x67BDE618)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/list.h)(0x67BDE618)
-F (..\Core\Src\user\mytask.c)(0x67C310B4)(--c99 -c --cpu Cortex-M3 -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Core\Inc\user-I.\RTE\_FreeRTOSSTM32ZET6-ID:\Apps\Works\Keil_v5\Keil_v5\ARM\Pack\ARM\CMSIS\4.2.0\CMSIS\Include-ID:\Apps\Works\Keil_v5\Keil_v5\ARM\Pack\Keil\STM32F1xx_DFP\2.4.0\Device\Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F10X_HD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xE-o freertosstm32zet6\mytask.o --omf_browse freertosstm32zet6\mytask.crf --depend freertosstm32zet6\mytask.d)
+F (..\Core\Src\user\mytask.c)(0x67C3F189)(--c99 -c --cpu Cortex-M3 -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3 -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ..\Core\Inc\user-I.\RTE\_FreeRTOSSTM32ZET6-ID:\Apps\Works\Keil_v5\Keil_v5\ARM\Pack\ARM\CMSIS\4.2.0\CMSIS\Include-ID:\Apps\Works\Keil_v5\Keil_v5\ARM\Pack\Keil\STM32F1xx_DFP\2.4.0\Device\Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F10X_HD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xE-o freertosstm32zet6\mytask.o --omf_browse freertosstm32zet6\mytask.crf --depend freertosstm32zet6\mytask.d)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h)(0x67BDE618)
 I (D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\include\stddef.h)(0x5475F300)
 I (D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5475F300)
@@ -862,3 +862,6 @@ I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h)(0x67BDE618)
 I (../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h)(0x67BDE618)
 I (../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h)(0x67BDE618)
 I (../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h)(0x67BDE618)
+I (D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\include\stdio.h)(0x5475F300)
+I (D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\include\stdarg.h)(0x5475F2FA)
+I (D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\include\string.h)(0x5475F300)
