@@ -33,6 +33,8 @@ freertosstm32zet6\mytask.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dm
 freertosstm32zet6\mytask.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h
 freertosstm32zet6\mytask.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h
 freertosstm32zet6\mytask.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h
+freertosstm32zet6\mytask.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_sram.h
+freertosstm32zet6\mytask.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ll_fsmc.h
 freertosstm32zet6\mytask.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
 freertosstm32zet6\mytask.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 freertosstm32zet6\mytask.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
@@ -43,3 +45,8 @@ freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\inclu
 freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 freertosstm32zet6\mytask.o: ../Core/Inc/gpio.h
+freertosstm32zet6\mytask.o: ../Core/Inc/user/lcd.h
+freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+freertosstm32zet6\mytask.o: ../Core/Inc/dma.h
+freertosstm32zet6\mytask.o: ../Core/Inc/usart.h
+freertosstm32zet6\mytask.o: ../Core/Inc/user/delay.h

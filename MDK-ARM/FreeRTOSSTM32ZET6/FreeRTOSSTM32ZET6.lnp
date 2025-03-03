@@ -4,6 +4,7 @@
 "freertosstm32zet6\gpio.o"
 "freertosstm32zet6\freertos.o"
 "freertosstm32zet6\dma.o"
+"freertosstm32zet6\fsmc.o"
 "freertosstm32zet6\usart.o"
 "freertosstm32zet6\stm32f1xx_it.o"
 "freertosstm32zet6\stm32f1xx_hal_msp.o"
@@ -21,6 +22,11 @@
 "freertosstm32zet6\stm32f1xx_hal_flash.o"
 "freertosstm32zet6\stm32f1xx_hal_flash_ex.o"
 "freertosstm32zet6\stm32f1xx_hal_exti.o"
+"freertosstm32zet6\stm32f1xx_ll_fsmc.o"
+"freertosstm32zet6\stm32f1xx_hal_nor.o"
+"freertosstm32zet6\stm32f1xx_hal_sram.o"
+"freertosstm32zet6\stm32f1xx_hal_nand.o"
+"freertosstm32zet6\stm32f1xx_hal_pccard.o"
 "freertosstm32zet6\stm32f1xx_hal_uart.o"
 "freertosstm32zet6\system_stm32f1xx.o"
 "freertosstm32zet6\croutine.o"
@@ -34,6 +40,8 @@
 "freertosstm32zet6\heap_4.o"
 "freertosstm32zet6\port.o"
 "freertosstm32zet6\mytask.o"
+"freertosstm32zet6\lcd.o"
+"freertosstm32zet6\delay.o"
 --strict --scatter "FreeRTOSSTM32ZET6\FreeRTOSSTM32ZET6.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
