@@ -1,3 +1,33 @@
+/**********************************************************************//**
+  * @file    mytask.c
+  * @author  Cossiant
+  * @version V1.3.1
+  * @date    03-March-2025
+  * @brief   FreeRTOS任务核心实现
+  *
+  * @verbatim
+  * ====================================================================
+  * 系统功能:
+  *  - 串口DMA通信任务 (优先级: osPriorityHigh)
+  *  - LCD显示刷新任务 (优先级: osPriorityNormal)
+  *  - LED控制状态机 (优先级: osPriorityLow)
+  * 
+  * 硬件依赖:
+  *  - USART1 (PA9/PA10)
+  *  - FSMC Bank1 NE4 (PG12)
+  *  - LED0 (PB05), LED1 (PE04)
+	*  - A49881 步进电机驱动（未来将会得到支持和应用）
+  * 
+  * 修改记录:
+  * 2025-02-28 V1.0.0  完成仓库初始化及FreeRTOS初始配置
+  * 2025-03-01 V1.1.0  完成串口发送任务学习，使其能够合理使用FreeRTOS通过串口发送数据
+  * 2025-03-02 V1.2.0  完成DMA串口接收及其点亮LED任务
+	* 2025-03-03 V1.3.1  开源至github，并完成LCD点亮工作，并使其能够正常显示通过串口发送过来的数据
+  * ====================================================================
+  * @endverbatim
+  ************************************************************************/
+
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
@@ -35,9 +65,17 @@ char LED_Read_data[UART1_DMA_RX_LEN];
 unsigned char LED_Conctrl = 0;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 串口发送函数
-// 可变长参数函数
-// 与操作系统printf函数完全一致
+/**
+ * @brief   定制化串口格式化输出函数
+ * @param   format: 格式化字符串（支持%d, %x, %s等标准格式）
+ * @param   ...: 可变参数列表
+ * @retval  None
+ * @note    使用内部缓冲gbuf_printf（大小：UART1_DMA_RX_LEN）
+ *          依赖HAL_UART_Transmit_DMA实现非阻塞发送
+ *          线程安全设计（通过uart1_printf_gsemHandle互斥锁）
+ * @warning 禁止在中断上下文中调用
+ * @example myprintf("ADC Value: %d", adc_val);
+ */
 void myprintf(char *format, ...)
 {
     // 创建可变参数列表类型变量ap
@@ -55,8 +93,19 @@ void myprintf(char *format, ...)
     // 释放ap的资源
     va_end(ap);
 }
-
-// 中断响应函数
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief   串口发送完成中断回调
+ * @param   huart: 串口句柄指针
+ * @retval  None
+ * @note    释放串口发送互斥量
+ *          当发送完成时触发LED闪烁指示
+ * @warning 此函数在中断上下文中执行（保持简短）
+ * 
+ * 关联全局变量:
+ * - uart1_printf_gsemHandle : 串口发送互斥信号量
+ * - tx_complete_flag : 发送完成标志位（bit0）
+ */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (huart->Instance == USART1) {
@@ -65,8 +114,14 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 串口接收函数
-// 这个函数需要将其放入中断文件中，调用这个中断响应函数
+/**
+ * @brief   串口数据接收处理引擎
+ * @param   None
+ * @retval  None
+ * @note    当产生空闲中断就释放串口接收任务信号量
+ *          随后进入串口接收任务（DMA模式）
+ * @warning 这个函数需要将其放入中断文件(stm32f1xx_it.C)中，调用这个中断响应函数
+ */
 void uart1_data_in()
 {
     if ((__HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE) != RESET)) {
@@ -76,8 +131,18 @@ void uart1_data_in()
         osSemaphoreRelease(uart1_rxok_gsemHandle);
     }
 }
-
-// 串口接受任务
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief  串口接收任务（DMA模式）
+ * @param  argument: FreeRTOS任务参数指针
+ * @retval None
+ * @note   使用HAL_UART_Receive_DMA配合空闲中断实现
+ *         环形缓冲区大小：UART1_DMA_RX_LEN(50)
+ *         信号量：
+ *           - uart1_rxok_gsemHandle : 数据接收完成信号
+ *           - LCD_refresh_gsemHandle: LCD刷新触发信号
+ * @warning 禁止在中断中调用本函数
+ */
 void StartUART1_recv_TaskFunction(void *argument)
 {
     // now_dma_ip当前数据缓冲区数据长度
@@ -107,9 +172,6 @@ void StartUART1_recv_TaskFunction(void *argument)
             Read_data[Read_data_len++] = rxBuffer[rd_dma_ip++];
             if (rd_dma_ip >= UART1_DMA_RX_LEN) rd_dma_ip = 0;
         }
-        // 添加字符串结束符
-        // myprintf("Read data is :%s", Read_data);
-        // Read_data[Read_data_len] = '\0';
         //保存上次读取到的数据
         strcpy(LED_Read_data,Read_data);
         // 释放LCD刷新信号量
@@ -117,8 +179,15 @@ void StartUART1_recv_TaskFunction(void *argument)
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// 任务1
+/**
+ * @brief   LED1控制任务（主状态指示灯）
+ * @param   argument: FreeRTOS任务参数（未使用）
+ * @retval  None
+ * @note    工作模式:每隔100ms就进行一次LED_Read_data内容检测
+ *          检测到LED_OFF时，串口发送Now LED OFF!并关闭所有LED，并将LED_Conctrl值改为1
+ *          检测到LED_ON时，串口发送Now LED ON!并开启所有LED，并将LED_Conctrl值改为1
+*          检测到LED_AUTO时，串口发送Now LED AUTO!并将LED_Conctrl值改为0，并让LED2控制任务可以正常工作
+ */
 void StartLED1TaskFunction(void *argument)
 {
     for (;;) {
@@ -143,8 +212,14 @@ void StartLED1TaskFunction(void *argument)
         osDelay(100);
     }
 }
-
-// 任务2
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief   LED2控制任务（通信状态指示）
+ * @param   argument: FreeRTOS任务参数（未使用）
+ * @retval  None
+ * @note    工作模式:当LED_Conctrl == 0时
+ *          每一秒钟都进行LED的GPIO电平反转，实现LED闪烁
+ */
 void StartLED2TaskFunction(void *argument)
 {
     for (;;) {
@@ -155,7 +230,16 @@ void StartLED2TaskFunction(void *argument)
         osDelay(1000);
     }
 }
-// LCD显示及其初始化任务
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*--------------------------------------------------------------------
+ * 函数名称: LCD_RefreshHandler
+ * 功能描述: LCD显示刷新状态机
+ * 参数: 
+ *   mode - 刷新模式 (0:全刷,1:局部刷新)
+ * 返回值: 实际刷新耗时（单位：ms）
+ * 注意事项:
+ *   全刷模式耗时约18ms，建议在任务低负载时调用
+ *------------------------------------------------------------------*/
 void StartLCDDisplayTaskFunction(void *argument)
 {
     //定义背景刷新
@@ -229,3 +313,4 @@ void StartLCDDisplayTaskFunction(void *argument)
         if (x == 12) x = 0;
     }
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
