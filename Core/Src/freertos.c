@@ -54,31 +54,31 @@ const osThreadAttr_t defauleTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for LED2Task */
-osThreadId_t LED2TaskHandle;
-const osThreadAttr_t LED2Task_attributes = {
-  .name = "LED2Task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
-/* Definitions for LED1Task */
-osThreadId_t LED1TaskHandle;
-const osThreadAttr_t LED1Task_attributes = {
-  .name = "LED1Task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 /* Definitions for UART1_recv_Task */
 osThreadId_t UART1_recv_TaskHandle;
 const osThreadAttr_t UART1_recv_Task_attributes = {
   .name = "UART1_recv_Task",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityBelowNormal,
 };
 /* Definitions for LCDDisplayTask */
 osThreadId_t LCDDisplayTaskHandle;
 const osThreadAttr_t LCDDisplayTask_attributes = {
   .name = "LCDDisplayTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for LEDProcessedTas */
+osThreadId_t LEDProcessedTasHandle;
+const osThreadAttr_t LEDProcessedTas_attributes = {
+  .name = "LEDProcessedTas",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityBelowNormal,
+};
+/* Definitions for LEDWorkTask */
+osThreadId_t LEDWorkTaskHandle;
+const osThreadAttr_t LEDWorkTask_attributes = {
+  .name = "LEDWorkTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
@@ -104,10 +104,10 @@ const osSemaphoreAttr_t LCD_refresh_gsem_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartdefauleTask(void *argument);
-extern void StartLED2TaskFunction(void *argument);
-extern void StartLED1TaskFunction(void *argument);
 extern void StartUART1_recv_TaskFunction(void *argument);
 extern void StartLCDDisplayTaskFunction(void *argument);
+extern void StartLEDProcessedTaskFunction(void *argument);
+extern void StartLEDWorkTaskFunction(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -151,17 +151,17 @@ void MX_FREERTOS_Init(void) {
   /* creation of defauleTask */
   defauleTaskHandle = osThreadNew(StartdefauleTask, NULL, &defauleTask_attributes);
 
-  /* creation of LED2Task */
-  LED2TaskHandle = osThreadNew(StartLED2TaskFunction, NULL, &LED2Task_attributes);
-
-  /* creation of LED1Task */
-  LED1TaskHandle = osThreadNew(StartLED1TaskFunction, NULL, &LED1Task_attributes);
-
   /* creation of UART1_recv_Task */
   UART1_recv_TaskHandle = osThreadNew(StartUART1_recv_TaskFunction, NULL, &UART1_recv_Task_attributes);
 
   /* creation of LCDDisplayTask */
   LCDDisplayTaskHandle = osThreadNew(StartLCDDisplayTaskFunction, NULL, &LCDDisplayTask_attributes);
+
+  /* creation of LEDProcessedTas */
+  LEDProcessedTasHandle = osThreadNew(StartLEDProcessedTaskFunction, NULL, &LEDProcessedTas_attributes);
+
+  /* creation of LEDWorkTask */
+  LEDWorkTaskHandle = osThreadNew(StartLEDWorkTaskFunction, NULL, &LEDWorkTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

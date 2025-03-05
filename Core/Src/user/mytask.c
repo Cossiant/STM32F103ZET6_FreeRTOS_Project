@@ -1,32 +1,32 @@
-/**********************************************************************//**
-  * @file    mytask.c
-  * @author  Cossiant
-  * @version V1.3.1
-  * @date    03-March-2025
-  * @brief   FreeRTOS任务核心实现
-  *
-  * @verbatim
-  * ====================================================================
-  * 系统功能:
-  *  - 串口DMA通信任务 (优先级: osPriorityHigh)
-  *  - LCD显示刷新任务 (优先级: osPriorityNormal)
-  *  - LED控制状态机 (优先级: osPriorityLow)
-  * 
-  * 硬件依赖:
-  *  - USART1 (PA9/PA10)
-  *  - FSMC Bank1 NE4 (PG12)
-  *  - LED0 (PB05), LED1 (PE04)
-	*  - A49881 步进电机驱动（未来将会得到支持和应用）
-  * 
-  * 修改记录:
-  * 2025-02-28 V1.0.0  完成仓库初始化及FreeRTOS初始配置
-  * 2025-03-01 V1.1.0  完成串口发送任务学习，使其能够合理使用FreeRTOS通过串口发送数据
-  * 2025-03-02 V1.2.0  完成DMA串口接收及其点亮LED任务
-	* 2025-03-03 V1.3.1  开源至github，并完成LCD点亮工作，并使其能够正常显示通过串口发送过来的数据
-  * ====================================================================
-  * @endverbatim
-  ************************************************************************/
-
+/**
+ * @file    mytask.c
+ * @author  Cossiant
+ * @version V1.3.1
+ * @date    03-March-2025
+ * @brief   FreeRTOS任务核心实现
+ *
+ * @verbatim
+ * ====================================================================
+ * 系统功能:
+ *  - 串口DMA通信任务 (优先级: osPriorityHigh)
+ *  - LCD显示刷新任务 (优先级: osPriorityNormal)
+ *  - LED控制状态机 (优先级: osPriorityLow)
+ *
+ * 硬件依赖:
+ *  - USART1 (PA9/PA10)
+ *  - FSMC Bank1 NE4 (PG12)
+ *  - LED0 (PB05), LED1 (PE04)
+ *  - A49881 步进电机驱动（未来将会得到支持和应用）
+ *
+ * 修改记录:
+ * 2025-02-28 V1.0.0  完成仓库初始化及FreeRTOS初始配置
+ * 2025-03-01 V1.1.0  完成串口发送任务学习，使其能够合理使用FreeRTOS通过串口发送数据
+ * 2025-03-02 V1.2.0  完成DMA串口接收及其点亮LED任务
+ * 2025-03-03 V1.3.1  开源至github，并完成LCD点亮工作，并使其能够正常显示通过串口发送过来的数据
+ * 2025-03-05 V1.3.2  重构LED控制代码，实现命令处理和LED控制分离
+ * ====================================================================
+ * @endverbatim
+ ************************************************************************/
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -41,7 +41,7 @@
 
 #define UART1_DMA_RX_LEN 50
 
-//定义串口号
+// 定义串口号
 extern UART_HandleTypeDef huart1;
 // 定义DMA接口
 extern DMA_HandleTypeDef hdma_usart1_rx;
@@ -54,15 +54,23 @@ extern osSemaphoreId_t LCD_refresh_gsemHandle;
 char gbuf_printf[UART1_DMA_RX_LEN];
 
 // 接收到的数据
-//注意，本参数每次接收到新的数据都将被清空！
+// 注意，本参数每次接收到新的数据都将被清空！
 char Read_data[UART1_DMA_RX_LEN];
 
-//上一次接收到的数据
-//本参数接收到数据之后将被LED使用，使用之后将会被清空！
+// 上一次接收到的数据
+// 本参数接收到数据之后将被LED使用，使用之后将会被清空！
 char LED_Read_data[UART1_DMA_RX_LEN];
 
 // LED控制标志位
-unsigned char LED_Conctrl = 0;
+// 拥有参数LED_AUTO,LED_ON,LED_OFF
+enum {
+    LED_AUTO,
+    LED_ON,
+    LED_OFF,
+    LED_Artificial
+} LED_Conctrl_MOD;
+
+unsigned char LED_Conctrl_num = LED_AUTO;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -101,7 +109,7 @@ void myprintf(char *format, ...)
  * @note    释放串口发送互斥量
  *          当发送完成时触发LED闪烁指示
  * @warning 此函数在中断上下文中执行（保持简短）
- * 
+ *
  * 关联全局变量:
  * - uart1_printf_gsemHandle : 串口发送互斥信号量
  * - tx_complete_flag : 发送完成标志位（bit0）
@@ -172,69 +180,87 @@ void StartUART1_recv_TaskFunction(void *argument)
             Read_data[Read_data_len++] = rxBuffer[rd_dma_ip++];
             if (rd_dma_ip >= UART1_DMA_RX_LEN) rd_dma_ip = 0;
         }
-        //保存上次读取到的数据
-        strcpy(LED_Read_data,Read_data);
+        // 保存上次读取到的数据
+        strcpy(LED_Read_data, Read_data);
         // 释放LCD刷新信号量
         osSemaphoreRelease(LCD_refresh_gsemHandle);
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * @brief   LED1控制任务（主状态指示灯）
+ * @brief   LED控制命令处理任务
  * @param   argument: FreeRTOS任务参数（未使用）
  * @retval  None
  * @note    工作模式:每隔100ms就进行一次LED_Read_data内容检测
- *          检测到LED_OFF时，串口发送Now LED OFF!并关闭所有LED，并将LED_Conctrl值改为1
- *          检测到LED_ON时，串口发送Now LED ON!并开启所有LED，并将LED_Conctrl值改为1
-*          检测到LED_AUTO时，串口发送Now LED AUTO!并将LED_Conctrl值改为0，并让LED2控制任务可以正常工作
+ *          检测到LED_OFF时，串口发送Now LED OFF!并并将LED_Conctrl_num值改为LED_OFF
+ *          检测到LED_ON时，串口发送Now LED ON!将LED_Conctrl_num值改为LED_ON
+ *          检测到LED_AUTO时，串口发送Now LED AUTO!并将LED_Conctrl_num值改为LED_AUTO
  */
-void StartLED1TaskFunction(void *argument)
+void StartLEDProcessedTaskFunction(void *argument)
 {
     for (;;) {
+        // 读取LED_Read_data进行检测后给LED_Conctrl_num赋值
+        if (strcmp(LED_Read_data, "LED_AUTO") == 0) {
+            myprintf("Now LED AUTO!");
+            LED_Conctrl_num = LED_AUTO;
+        }
         if (strcmp(LED_Read_data, "LED_OFF") == 0) {
             myprintf("Now LED OFF!");
-            LED_Conctrl = 1;
-            HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
-            HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+            LED_Conctrl_num = LED_OFF;
         }
         if (strcmp(LED_Read_data, "LED_ON") == 0) {
             myprintf("Now LED ON!");
-            LED_Conctrl = 1;
-            HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
-            HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-        }
-        if (strcmp(LED_Read_data, "LED_AUTO") == 0) {
-            myprintf("Now LED AUTO!");
-            LED_Conctrl = 0;
+            LED_Conctrl_num = LED_ON;
         }
         // 清空指令缓冲区
         memset(LED_Read_data, 0, UART1_DMA_RX_LEN);
         osDelay(100);
     }
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * @brief   LED2控制任务（通信状态指示）
+ * @brief   LED控制任务（主状态指示灯）
  * @param   argument: FreeRTOS任务参数（未使用）
  * @retval  None
- * @note    工作模式:当LED_Conctrl == 0时
- *          每一秒钟都进行LED的GPIO电平反转，实现LED闪烁
+ * @note    工作模式:每隔100ms就进行一次LED_Conctrl_num检测
+ *          如果LED_Conctrl_num不是手动模式时，将进行下一步检测，否则将重复等待100ms后检测
+ *          检测到LED_OFF时，关闭所有LED，将模式调成手动模式
+ *          检测到LED_ON时，开启所有LED，将模式调成手动模式
+ *          检测到LED_AUTO时，让LED一直闪烁
  */
-void StartLED2TaskFunction(void *argument)
+void StartLEDWorkTaskFunction(void *argument)
 {
     for (;;) {
-        if (LED_Conctrl == 0) {
-            HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin);
-            HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+        if (LED_Conctrl_num != LED_Artificial) {
+            switch (LED_Conctrl_num) {
+                case LED_AUTO:
+                    HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin);
+                    HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+                    break;
+                case LED_ON:
+                    HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
+                    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+                    LED_Conctrl_num = LED_Artificial;
+                    break;
+                case LED_OFF:
+                    HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
+                    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+                    LED_Conctrl_num = LED_Artificial;
+                    break;
+                default:
+                    break;
+            }
+            osDelay(1000);
+            // 如果完成这次LED闪烁就跳过剩下的代码，重新开始，这样能够稳定保证1s的闪烁周期
+            continue;
         }
-        osDelay(1000);
+        osDelay(100);
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*--------------------------------------------------------------------
  * 函数名称: LCD_RefreshHandler
  * 功能描述: LCD显示刷新状态机
- * 参数: 
+ * 参数:
  *   mode - 刷新模式 (0:全刷,1:局部刷新)
  * 返回值: 实际刷新耗时（单位：ms）
  * 注意事项:
@@ -242,9 +268,9 @@ void StartLED2TaskFunction(void *argument)
  *------------------------------------------------------------------*/
 void StartLCDDisplayTaskFunction(void *argument)
 {
-    //定义背景刷新
+    // 定义背景刷新
     uint8_t x = 0;
-    //顶所以Lcd的id
+    // 顶所以Lcd的id
     uint8_t lcd_id[12];
     delay_init(72); /* 延时初始化 */
     lcd_init();     /* 初始化LCD */
@@ -252,7 +278,7 @@ void StartLCDDisplayTaskFunction(void *argument)
     sprintf((char *)lcd_id, "LCD ID:%04X", lcddev.id); /* 将LCD ID打印到lcd_id数组 */
 
     for (;;) {
-        osSemaphoreAcquire(LCD_refresh_gsemHandle,osWaitForever);
+        osSemaphoreAcquire(LCD_refresh_gsemHandle, osWaitForever);
         switch (x) {
             case 0:
                 lcd_clear(WHITE);
