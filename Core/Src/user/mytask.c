@@ -24,6 +24,7 @@
  * 2025-03-02 V1.2.0  完成DMA串口接收及其点亮LED任务
  * 2025-03-03 V1.3.1  开源至github，并完成LCD点亮工作，并使其能够正常显示通过串口发送过来的数据
  * 2025-03-05 V1.3.2  重构LED控制代码，实现命令处理和LED控制分离
+ * 2025-03-20 V1.4.0  重构数据结构，使数据能够被多个函数调用和修改，并且还可以跨C文件调用。并且新增加时间显示功能
  * ====================================================================
  * @endverbatim
  ************************************************************************/
@@ -39,7 +40,6 @@
 #include "lcd.h"
 #include "delay.h"
 #include "mytask.h"
-#define UART1_DMA_RX_LEN 50
 
 // 定义串口号
 extern UART_HandleTypeDef huart1;
@@ -53,14 +53,6 @@ extern osSemaphoreId_t LCD_refresh_gsemHandle;
 // 要发送的数据
 char gbuf_printf[UART1_DMA_RX_LEN];
 
-// 接收到的数据
-// 注意，本参数每次接收到新的数据都将被清空！
-char Read_data[UART1_DMA_RX_LEN];
-
-// 上一次接收到的数据
-// 本参数接收到数据之后将被LED使用，使用之后将会被清空！
-char LED_Read_data[UART1_DMA_RX_LEN];
-
 // LED控制标志位
 // 拥有参数LED_AUTO,LED_ON,LED_OFF
 enum {
@@ -69,7 +61,6 @@ enum {
     LED_OFF,
     LED_Artificial
 } LED_Conctrl_MOD;
-
 unsigned char LED_Conctrl_num = LED_AUTO;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,10 +144,11 @@ void uart1_data_in()
  */
 void StartUART1_recv_TaskFunction(void *argument)
 {
+    SYS_USE_DATA * SYS = (SYS_USE_DATA*)argument;
     // now_dma_ip当前数据缓冲区数据长度
     // rd_dma_ip读到的数据的长度
     unsigned short now_dam_ip, rd_dma_ip = 0, Read_data_len;
-    // 接受缓冲区rxBuffer，指令缓冲区Read_data
+    // 接受缓冲区rxBuffer，指令缓冲区SYS->usart_use_data.Read_data
     char rxBuffer[UART1_DMA_RX_LEN];
     // 初始化DMA缓冲区
     memset(rxBuffer, 0, UART1_DMA_RX_LEN);
@@ -173,15 +165,15 @@ void StartUART1_recv_TaskFunction(void *argument)
         // 将读取到的数据的指针重置为0
         Read_data_len = 0;
         // 清空指令缓冲区
-        memset(Read_data, 0, UART1_DMA_RX_LEN);
+        memset(SYS->usart_use_data.Read_data, 0, UART1_DMA_RX_LEN);
         // 如果读指针不等于当前数据指针
         while (rd_dma_ip != now_dam_ip) {
-            // 将数据读取到Read_data当中
-            Read_data[Read_data_len++] = rxBuffer[rd_dma_ip++];
+            // 将数据读取到SYS->usart_use_data.Read_data当中
+            SYS->usart_use_data.Read_data[Read_data_len++] = rxBuffer[rd_dma_ip++];
             if (rd_dma_ip >= UART1_DMA_RX_LEN) rd_dma_ip = 0;
         }
         // 保存上次读取到的数据
-        strcpy(LED_Read_data, Read_data);
+        strcpy(SYS->usart_use_data.LED_Read_data, SYS->usart_use_data.Read_data);
         // 释放LCD刷新信号量
         osSemaphoreRelease(LCD_refresh_gsemHandle);
     }
@@ -191,29 +183,30 @@ void StartUART1_recv_TaskFunction(void *argument)
  * @brief   LED控制命令处理任务
  * @param   argument: FreeRTOS任务参数（未使用）
  * @retval  None
- * @note    工作模式:每隔100ms就进行一次LED_Read_data内容检测
+ * @note    工作模式:每隔100ms就进行一次SYS->usart_use_data.LED_Read_data内容检测
  *          检测到LED_OFF时，串口发送Now LED OFF!并并将LED_Conctrl_num值改为LED_OFF
  *          检测到LED_ON时，串口发送Now LED ON!将LED_Conctrl_num值改为LED_ON
  *          检测到LED_AUTO时，串口发送Now LED AUTO!并将LED_Conctrl_num值改为LED_AUTO
  */
 void StartLEDProcessedTaskFunction(void *argument)
 {
+    SYS_USE_DATA * SYS = (SYS_USE_DATA*)argument;
     for (;;) {
-        // 读取LED_Read_data进行检测后给LED_Conctrl_num赋值
-        if (strcmp(LED_Read_data, "LED_AUTO") == 0) {
+        // 读取SYS->usart_use_data.LED_Read_data进行检测后给LED_Conctrl_num赋值
+        if (strcmp(SYS->usart_use_data.LED_Read_data, "LED_AUTO") == 0) {
             myprintf("Now LED AUTO!");
             LED_Conctrl_num = LED_AUTO;
         }
-        if (strcmp(LED_Read_data, "LED_OFF") == 0) {
+        if (strcmp(SYS->usart_use_data.LED_Read_data, "LED_OFF") == 0) {
             myprintf("Now LED OFF!");
             LED_Conctrl_num = LED_OFF;
         }
-        if (strcmp(LED_Read_data, "LED_ON") == 0) {
+        if (strcmp(SYS->usart_use_data.LED_Read_data, "LED_ON") == 0) {
             myprintf("Now LED ON!");
             LED_Conctrl_num = LED_ON;
         }
         // 清空指令缓冲区
-        memset(LED_Read_data, 0, UART1_DMA_RX_LEN);
+        memset(SYS->usart_use_data.LED_Read_data, 0, UART1_DMA_RX_LEN);
         osDelay(100);
     }
 }
@@ -271,7 +264,7 @@ void StartLEDWorkTaskFunction(void *argument)
  * 
  * @warning 注意以下内存风险：
  *          - lcd_id缓冲区仅12字节，确保sprintf不溢出
- *          - Read_data需外部保证非NULL且'\0'结尾
+ *          - SYS->usart_use_data.Read_data需外部保证非NULL且'\0'结尾
  * 
  * 硬件依赖:
  * - FSMC接口: Bank1 NE1 (PD7)
@@ -283,7 +276,7 @@ void StartLEDWorkTaskFunction(void *argument)
  */
 void StartLCDDisplayTaskFunction(void *argument)
 {
-    TIME_STRUCT *NowTime = (TIME_STRUCT *)argument; // 时间数据源
+    SYS_USE_DATA * SYS = (SYS_USE_DATA*)argument;
     uint8_t lcd_id[12]; // LCD ID显示缓冲（注意大小限制！）
     
     /* 硬件初始化链 */
@@ -300,11 +293,11 @@ void StartLCDDisplayTaskFunction(void *argument)
         osSemaphoreAcquire(LCD_refresh_gsemHandle, osWaitForever);
 
         /* ----- 时间显示区域（L0层）----- */
-        lcd_show_xnum(10, 10, NowTime->hours, 2, 24, 0x80, BLACK);  // 小时
+        lcd_show_xnum(10, 10, SYS->Time_use_data.hours, 2, 24, 0x80, BLACK);  // 小时
         lcd_show_string(34, 10, 240, 32, 24, ":", BLACK);           // 冒号
-        lcd_show_xnum(46, 10, NowTime->minute, 2, 24, 0x80, BLACK); // 分钟
+        lcd_show_xnum(46, 10, SYS->Time_use_data.minute, 2, 24, 0x80, BLACK); // 分钟
         lcd_show_string(70, 10, 240, 32, 24, ":", BLACK);
-        lcd_show_xnum(82, 10, NowTime->second, 2, 24, 0x80, BLACK); // 秒
+        lcd_show_xnum(82, 10, SYS->Time_use_data.second, 2, 24, 0x80, BLACK); // 秒
 
         /* ----- 设备信息区域（L1层）----- */
         lcd_show_string(10, 40, 240, 32, 32, "STM32F103ZET6", RED); // 主控型号
@@ -314,10 +307,14 @@ void StartLCDDisplayTaskFunction(void *argument)
 
         /* ----- 动态数据区域（L2层）----- */
         lcd_show_string(10, 150, 240, 16, 16, "UART read data is :", BLACK);
-        lcd_show_string(10, 170, 240, 16, 16, (char *)Read_data, BLACK); // 串口数据
-        
+        if (strcmp(SYS->usart_use_data.Read_data,SYS->usart_use_data.Last_Read_data)!=0)
+        {
+            lcd_show_string(10, 170, 240, 16, 16, "        ", BLACK); // 清空当前行显示
+            lcd_show_string(10, 170, 240, 16, 16, (char *)SYS->usart_use_data.Read_data, BLACK); // 串口数据
+            strcpy(SYS->usart_use_data.Read_data,SYS->usart_use_data.Last_Read_data);//将上次接受的数据改为当前数据
+        }
         // 调试输出（建议使用条件编译控制）
-        myprintf("LCD refresh data is :%s", Read_data); 
+        //myprintf("LCD refresh data is :%s", SYS->usart_use_data.Read_data); 
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -344,29 +341,30 @@ void StartLCDDisplayTaskFunction(void *argument)
  */
 void StartTimeSetTaskFunction(void *argument)
 {
-    TIME_STRUCT *Nowtime = (TIME_STRUCT *)argument;
+    SYS_USE_DATA* SYS = (SYS_USE_DATA*)argument;
     
     /* 初始化模拟RTC */
-    Nowtime->hours  = 23;   // 初始小时（测试跨日场景）
-    Nowtime->minute = 59;   // 初始分钟
-    Nowtime->second = 50;   // 初始秒数
+    // 修改初始参数请前往mytask.h
+    SYS->Time_use_data.hours  = Set_Time_hours;   // 初始小时（测试跨日场景）
+    SYS->Time_use_data.minute = Set_Time_minute;   // 初始分钟
+    SYS->Time_use_data.second = Set_Time_second;   // 初始秒数
 
     /* 时间维护主循环 */
     for (;;) {
         // 秒递增（原子操作建议）
-        Nowtime->second++;  
+        SYS->Time_use_data.second++;  
         
         /* 时间进位逻辑链 */
-        if (Nowtime->second >= 60) {    // 分钟进位
-            Nowtime->second = 0;
-            Nowtime->minute++;
+        if (SYS->Time_use_data.second >= 60) {    // 分钟进位
+            SYS->Time_use_data.second = 0;
+            SYS->Time_use_data.minute++;
             
-            if (Nowtime->minute >= 60) { // 小时进位
-                Nowtime->minute = 0;
-                Nowtime->hours++;
+            if (SYS->Time_use_data.minute >= 60) { // 小时进位
+                SYS->Time_use_data.minute = 0;
+                SYS->Time_use_data.hours++;
                 
-                if (Nowtime->hours >= 24) { // 日进位
-                    Nowtime->hours = 0;
+                if (SYS->Time_use_data.hours >= 24) { // 日进位
+                    SYS->Time_use_data.hours = 0;
                 }
             }
         }

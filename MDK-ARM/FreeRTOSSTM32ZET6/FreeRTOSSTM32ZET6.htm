@@ -3,11 +3,11 @@
 <title>Static Call Graph - [FreeRTOSSTM32ZET6\FreeRTOSSTM32ZET6.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image FreeRTOSSTM32ZET6\FreeRTOSSTM32ZET6.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050106: Last Updated: Thu Mar 20 15:25:29 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050106: Last Updated: Thu Mar 20 17:04:24 2025
 <BR><P>
-<H3>Maximum Stack Usage =        320 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =        400 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
-_printf_f &rArr; _printf_fp_dec &rArr; _printf_fp_dec_real &rArr; _fp_digits &rArr; _btod_etento &rArr; _btod_emul &rArr; _e2e
+__rt_entry_main &rArr; main &rArr; MX_FREERTOS_Init &rArr; osThreadNew &rArr; xTaskCreate &rArr; pvPortMalloc &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 <P>
 <H3>
 Functions with no stack information
@@ -398,7 +398,7 @@ Global Symbols
 <P><STRONG><a name="[199]"></a>__rt_entry_postsh_1</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$00000009))
 
 <P><STRONG><a name="[8c]"></a>__rt_entry_main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$0000000D))
-<BR><BR>[Stack]<UL><LI>Max Depth = 192 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 400 + Unknown Stack Size
 <LI>Call Chain = __rt_entry_main &rArr; main &rArr; MX_FREERTOS_Init &rArr; osThreadNew &rArr; xTaskCreate &rArr; pvPortMalloc &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -625,7 +625,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_sputc
 <LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_char_common
 </UL>
-<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
+<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
 </UL>
 
 <P><STRONG><a name="[96]"></a>__2sprintf</STRONG> (Thumb, 38 bytes, Stack size 32 bytes, __2sprintf.o(.text))
@@ -705,16 +705,17 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_printf_char_common
 </UL>
 
-<P><STRONG><a name="[107]"></a>strcpy</STRONG> (Thumb, 72 bytes, Stack size 12 bytes, strcpy.o(.text))
+<P><STRONG><a name="[103]"></a>strcpy</STRONG> (Thumb, 72 bytes, Stack size 12 bytes, strcpy.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = strcpy
 </UL>
 <BR>[Called By]<UL><LI><a href="#[51]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartUART1_recv_TaskFunction
+<LI><a href="#[52]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLCDDisplayTaskFunction
 </UL>
 
 <P><STRONG><a name="[12a]"></a>strlen</STRONG> (Thumb, 62 bytes, Stack size 8 bytes, strlen.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = strlen
 </UL>
-<BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
+<BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
 </UL>
 
 <P><STRONG><a name="[144]"></a>__aeabi_memcpy</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, rt_memcpy_v6.o(.text))
@@ -734,7 +735,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[14b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvInitialiseNewTask
 </UL>
 
-<P><STRONG><a name="[104]"></a>__aeabi_memclr</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, rt_memclr.o(.text))
+<P><STRONG><a name="[105]"></a>__aeabi_memclr</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, rt_memclr.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[51]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartUART1_recv_TaskFunction
 <LI><a href="#[53]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLEDProcessedTaskFunction
 </UL>
@@ -763,8 +764,9 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_memclr
 </UL>
 
-<P><STRONG><a name="[103]"></a>strcmp</STRONG> (Thumb, 128 bytes, Stack size 0 bytes, strcmpv7m.o(.text))
+<P><STRONG><a name="[102]"></a>strcmp</STRONG> (Thumb, 128 bytes, Stack size 0 bytes, strcmpv7m.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[53]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLEDProcessedTaskFunction
+<LI><a href="#[52]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLCDDisplayTaskFunction
 <LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_get_lc_ctype
 <LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_get_lc_numeric
 </UL>
@@ -1199,7 +1201,7 @@ Global Symbols
 <LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_init
 </UL>
 
-<P><STRONG><a name="[106]"></a>HAL_GPIO_TogglePin</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, stm32f1xx_hal_gpio.o(i.HAL_GPIO_TogglePin))
+<P><STRONG><a name="[107]"></a>HAL_GPIO_TogglePin</STRONG> (Thumb, 16 bytes, Stack size 0 bytes, stm32f1xx_hal_gpio.o(i.HAL_GPIO_TogglePin))
 <BR><BR>[Called By]<UL><LI><a href="#[54]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLEDWorkTaskFunction
 </UL>
 
@@ -1453,7 +1455,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[12b]"></a>HAL_UART_Transmit_IT</STRONG> (Thumb, 50 bytes, Stack size 0 bytes, stm32f1xx_hal_uart.o(i.HAL_UART_Transmit_IT))
-<BR><BR>[Called By]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
+<BR><BR>[Called By]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
 </UL>
 
 <P><STRONG><a name="[ea]"></a>HAL_UART_TxCpltCallback</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, mytask.o(i.HAL_UART_TxCpltCallback))
@@ -1480,8 +1482,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[f4]"></a>MX_FREERTOS_Init</STRONG> (Thumb, 130 bytes, Stack size 16 bytes, freertos.o(i.MX_FREERTOS_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 192 + Unknown Stack Size
+<P><STRONG><a name="[f4]"></a>MX_FREERTOS_Init</STRONG> (Thumb, 134 bytes, Stack size 224 bytes, freertos.o(i.MX_FREERTOS_Init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 400 + Unknown Stack Size
 <LI>Call Chain = MX_FREERTOS_Init &rArr; osThreadNew &rArr; xTaskCreate &rArr; pvPortMalloc &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osThreadNew
@@ -1532,58 +1534,59 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f103xe.o(RESET)
 </UL>
-<P><STRONG><a name="[52]"></a>StartLCDDisplayTaskFunction</STRONG> (Thumb, 298 bytes, Stack size 24 bytes, mytask.o(i.StartLCDDisplayTaskFunction))
-<BR><BR>[Stack]<UL><LI>Max Depth = 232 + Unknown Stack Size
+<P><STRONG><a name="[52]"></a>StartLCDDisplayTaskFunction</STRONG> (Thumb, 338 bytes, Stack size 40 bytes, mytask.o(i.StartLCDDisplayTaskFunction))
+<BR><BR>[Stack]<UL><LI>Max Depth = 248 + Unknown Stack Size
 <LI>Call Chain = StartLCDDisplayTaskFunction &rArr; lcd_init &rArr; HAL_SRAM_Init &rArr; HAL_SRAM_MspInit &rArr; HAL_FSMC_MspInit &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreAcquire
+<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcpy
 <LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
 <LI><a href="#[100]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_show_xnum
 <LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_show_string
 <LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_init
 <LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_clear
 <LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_init
-<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[53]"></a>StartLEDProcessedTaskFunction</STRONG> (Thumb, 78 bytes, Stack size 0 bytes, mytask.o(i.StartLEDProcessedTaskFunction))
+<P><STRONG><a name="[53]"></a>StartLEDProcessedTaskFunction</STRONG> (Thumb, 82 bytes, Stack size 0 bytes, mytask.o(i.StartLEDProcessedTaskFunction))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152 + Unknown Stack Size
 <LI>Call Chain = StartLEDProcessedTaskFunction &rArr; myprintf &rArr; osSemaphoreAcquire &rArr; xQueueSemaphoreTake &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
-<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
-<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
-<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
+<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
+<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
 <P><STRONG><a name="[54]"></a>StartLEDWorkTaskFunction</STRONG> (Thumb, 98 bytes, Stack size 0 bytes, mytask.o(i.StartLEDWorkTaskFunction))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = StartLEDWorkTaskFunction &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
-<LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_TogglePin
+<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_TogglePin
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
 <P><STRONG><a name="[55]"></a>StartTimeSetTaskFunction</STRONG> (Thumb, 78 bytes, Stack size 0 bytes, mytask.o(i.StartTimeSetTaskFunction))
 <BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = StartTimeSetTaskFunction &rArr; osSemaphoreRelease &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreRelease
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[51]"></a>StartUART1_recv_TaskFunction</STRONG> (Thumb, 132 bytes, Stack size 56 bytes, mytask.o(i.StartUART1_recv_TaskFunction))
-<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = StartUART1_recv_TaskFunction &rArr; osSemaphoreRelease &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
+<P><STRONG><a name="[51]"></a>StartUART1_recv_TaskFunction</STRONG> (Thumb, 136 bytes, Stack size 80 bytes, mytask.o(i.StartUART1_recv_TaskFunction))
+<BR><BR>[Stack]<UL><LI>Max Depth = 208<LI>Call Chain = StartUART1_recv_TaskFunction &rArr; osSemaphoreRelease &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_DMA
 <LI><a href="#[f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreRelease
 <LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreAcquire
 <LI><a href="#[f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
-<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
-<LI><a href="#[107]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcpy
+<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcpy
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
@@ -1592,7 +1595,7 @@ Global Symbols
 <LI>Call Chain = StartdefauleTask &rArr;  StartdefauleTask (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartdefauleTask
-<LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 </UL>
 <BR>[Called By]<UL><LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartdefauleTask
 </UL>
@@ -1714,7 +1717,7 @@ Global Symbols
 <P><STRONG><a name="[117]"></a>lcd_ex_ili9341_reginit</STRONG> (Thumb, 558 bytes, Stack size 8 bytes, lcd.o(i.lcd_ex_ili9341_reginit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = lcd_ex_ili9341_reginit &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_wr_regno
 <LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_wr_data
 </UL>
@@ -1724,7 +1727,7 @@ Global Symbols
 <P><STRONG><a name="[11a]"></a>lcd_ex_ili9806_reginit</STRONG> (Thumb, 834 bytes, Stack size 8 bytes, lcd.o(i.lcd_ex_ili9806_reginit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = lcd_ex_ili9806_reginit &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_wr_regno
 <LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_wr_data
 </UL>
@@ -1734,7 +1737,7 @@ Global Symbols
 <P><STRONG><a name="[11b]"></a>lcd_ex_nt35310_reginit</STRONG> (Thumb, 3828 bytes, Stack size 8 bytes, lcd.o(i.lcd_ex_nt35310_reginit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = lcd_ex_nt35310_reginit &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_wr_regno
 <LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_wr_data
 </UL>
@@ -1754,7 +1757,7 @@ Global Symbols
 <P><STRONG><a name="[11e]"></a>lcd_ex_ssd1963_reginit</STRONG> (Thumb, 368 bytes, Stack size 8 bytes, lcd.o(i.lcd_ex_ssd1963_reginit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = lcd_ex_ssd1963_reginit &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[111]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
 <LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_wr_regno
 <LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_wr_data
@@ -1765,7 +1768,7 @@ Global Symbols
 <P><STRONG><a name="[11f]"></a>lcd_ex_st7789_reginit</STRONG> (Thumb, 426 bytes, Stack size 8 bytes, lcd.o(i.lcd_ex_st7789_reginit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = lcd_ex_st7789_reginit &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_wr_regno
 <LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_wr_data
 </UL>
@@ -1775,7 +1778,7 @@ Global Symbols
 <P><STRONG><a name="[120]"></a>lcd_ex_st7796_reginit</STRONG> (Thumb, 456 bytes, Stack size 8 bytes, lcd.o(i.lcd_ex_st7796_reginit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = lcd_ex_st7796_reginit &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
-<BR>[Calls]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_wr_regno
 <LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_wr_data
 </UL>
@@ -1906,7 +1909,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[8d]"></a>main</STRONG> (Thumb, 38 bytes, Stack size 0 bytes, main.o(i.main))
-<BR><BR>[Stack]<UL><LI>Max Depth = 192 + Unknown Stack Size
+<BR><BR>[Stack]<UL><LI>Max Depth = 400 + Unknown Stack Size
 <LI>Call Chain = main &rArr; MX_FREERTOS_Init &rArr; osThreadNew &rArr; xTaskCreate &rArr; pvPortMalloc &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[129]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osKernelStart
@@ -1922,7 +1925,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[8c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_entry_main
 </UL>
 
-<P><STRONG><a name="[102]"></a>myprintf</STRONG> (Thumb, 58 bytes, Stack size 24 bytes, mytask.o(i.myprintf))
+<P><STRONG><a name="[104]"></a>myprintf</STRONG> (Thumb, 58 bytes, Stack size 24 bytes, mytask.o(i.myprintf))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152 + Unknown Stack Size
 <LI>Call Chain = myprintf &rArr; osSemaphoreAcquire &rArr; xQueueSemaphoreTake &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
@@ -1932,10 +1935,9 @@ Global Symbols
 <LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vsprintf
 </UL>
 <BR>[Called By]<UL><LI><a href="#[53]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLEDProcessedTaskFunction
-<LI><a href="#[52]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLCDDisplayTaskFunction
 </UL>
 
-<P><STRONG><a name="[105]"></a>osDelay</STRONG> (Thumb, 26 bytes, Stack size 8 bytes, cmsis_os2.o(i.osDelay))
+<P><STRONG><a name="[106]"></a>osDelay</STRONG> (Thumb, 26 bytes, Stack size 8 bytes, cmsis_os2.o(i.osDelay))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[12c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskDelay
@@ -1973,7 +1975,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[51]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartUART1_recv_TaskFunction
 <LI><a href="#[52]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLCDDisplayTaskFunction
-<LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
+<LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
 </UL>
 
 <P><STRONG><a name="[f5]"></a>osSemaphoreNew</STRONG> (Thumb, 152 bytes, Stack size 24 bytes, cmsis_os2.o(i.osSemaphoreNew))
@@ -2190,7 +2192,7 @@ Global Symbols
 <LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskSuspendAll
 <LI><a href="#[13a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddCurrentTaskToDelayedList
 </UL>
-<BR>[Called By]<UL><LI><a href="#[105]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<BR>[Called By]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 </UL>
 
 <P><STRONG><a name="[16c]"></a>vTaskInternalSetTimeOutState</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, tasks.o(i.vTaskInternalSetTimeOutState))
@@ -2552,7 +2554,7 @@ Global Symbols
 <P><STRONG><a name="[87]"></a>_get_lc_numeric</STRONG> (Thumb, 44 bytes, Stack size 8 bytes, lc_numeric_c.o(locale$$code))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = _get_lc_numeric
 </UL>
-<BR>[Calls]<UL><LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
+<BR>[Calls]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
 </UL>
 <BR>[Called By]<UL><LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_lib_init_lc_numeric_2
 </UL>
@@ -2560,7 +2562,7 @@ Global Symbols
 <P><STRONG><a name="[4e]"></a>_get_lc_ctype</STRONG> (Thumb, 44 bytes, Stack size 8 bytes, lc_ctype_c.o(locale$$code))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = _get_lc_ctype
 </UL>
-<BR>[Calls]<UL><LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
+<BR>[Calls]<UL><LI><a href="#[102]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
 </UL>
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_lib_init_lc_ctype_2
 </UL>
