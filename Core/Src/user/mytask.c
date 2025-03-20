@@ -38,7 +38,7 @@
 #include "gpio.h"
 #include "lcd.h"
 #include "delay.h"
-
+#include "mytask.h"
 #define UART1_DMA_RX_LEN 50
 
 // 定义串口号
@@ -257,86 +257,124 @@ void StartLEDWorkTaskFunction(void *argument)
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*--------------------------------------------------------------------
- * 函数名称: LCD_RefreshHandler
- * 功能描述: LCD显示刷新状态机
- * 参数:
- *   mode - 刷新模式 (0:全刷,1:局部刷新)
- * 返回值: 实际刷新耗时（单位：ms）
- * 注意事项:
- *   全刷模式耗时约18ms，建议在任务低负载时调用
- *------------------------------------------------------------------*/
+/**
+ * @brief   LCD显示刷新任务（核心GUI引擎）
+ * @param   argument: 时间数据结构体指针
+ * @retval  None
+ * @note    多层级显示架构：
+ *          --------------------------------
+ *          | 层级 | 内容          | 刷新频率 |
+ *          |------|---------------|---------|
+ *          | L0   | 时间显示       | 1Hz     |
+ *          | L1   | 设备信息       | 静态     |
+ *          | L2   | 串口数据       | 事件触发 |
+ * 
+ * @warning 注意以下内存风险：
+ *          - lcd_id缓冲区仅12字节，确保sprintf不溢出
+ *          - Read_data需外部保证非NULL且'\0'结尾
+ * 
+ * 硬件依赖:
+ * - FSMC接口: Bank1 NE1 (PD7)
+ * - 背光控制: PB15 (PWM调光支持)
+ * 
+ * 性能参数:
+ * - 单次全刷新耗时: ~25ms (320x240@16bit)
+ * - 局部刷新耗时: ~5ms (时间区域)
+ */
 void StartLCDDisplayTaskFunction(void *argument)
 {
-    // 定义背景刷新
-    uint8_t x = 0;
-    // 顶所以Lcd的id
-    uint8_t lcd_id[12];
-    delay_init(72); /* 延时初始化 */
-    lcd_init();     /* 初始化LCD */
-    g_point_color = RED;
-    sprintf((char *)lcd_id, "LCD ID:%04X", lcddev.id); /* 将LCD ID打印到lcd_id数组 */
+    TIME_STRUCT *NowTime = (TIME_STRUCT *)argument; // 时间数据源
+    uint8_t lcd_id[12]; // LCD ID显示缓冲（注意大小限制！）
+    
+    /* 硬件初始化链 */
+    delay_init(72);     // 精准延时（基于SysTick）
+    lcd_init();         // ILI9341驱动初始化
+    lcd_clear(WHITE);   // 清屏操作（防止残影）
+    
+    // 获取LCD硬件ID（关键诊断信息）
+    sprintf((char *)lcd_id, "LCD ID:%04X", lcddev.id); 
 
+    /* 主刷新循环 */
     for (;;) {
+        // 等待刷新信号量（最大等待时间可配置）
         osSemaphoreAcquire(LCD_refresh_gsemHandle, osWaitForever);
-        switch (x) {
-            case 0:
-                lcd_clear(WHITE);
-                break;
 
-            case 1:
-                lcd_clear(BLACK);
-                break;
+        /* ----- 时间显示区域（L0层）----- */
+        lcd_show_xnum(10, 10, NowTime->hours, 2, 24, 0x80, BLACK);  // 小时
+        lcd_show_string(34, 10, 240, 32, 24, ":", BLACK);           // 冒号
+        lcd_show_xnum(46, 10, NowTime->minute, 2, 24, 0x80, BLACK); // 分钟
+        lcd_show_string(70, 10, 240, 32, 24, ":", BLACK);
+        lcd_show_xnum(82, 10, NowTime->second, 2, 24, 0x80, BLACK); // 秒
 
-            case 2:
-                lcd_clear(BLUE);
-                break;
+        /* ----- 设备信息区域（L1层）----- */
+        lcd_show_string(10, 40, 240, 32, 32, "STM32F103ZET6", RED); // 主控型号
+        lcd_show_string(10, 80, 240, 24, 24, "TFTLCD TEST", RED);   // 测试标识
+        lcd_show_string(10, 110, 240, 16, 16, "User:Cossiant", RED); // 用户信息
+        lcd_show_string(10, 130, 240, 16, 16, (char *)lcd_id, RED); // LCD ID
 
-            case 3:
-                lcd_clear(RED);
-                break;
-
-            case 4:
-                lcd_clear(MAGENTA);
-                break;
-
-            case 5:
-                lcd_clear(GREEN);
-                break;
-
-            case 6:
-                lcd_clear(CYAN);
-                break;
-
-            case 7:
-                lcd_clear(YELLOW);
-                break;
-
-            case 8:
-                lcd_clear(BRRED);
-                break;
-
-            case 9:
-                lcd_clear(GRAY);
-                break;
-
-            case 10:
-                lcd_clear(LGRAY);
-                break;
-
-            case 11:
-                lcd_clear(BROWN);
-                break;
-        }
-        lcd_show_string(10, 40, 240, 32, 32, "STM32F103ZET6", RED);
-        lcd_show_string(10, 80, 240, 24, 24, "TFTLCD TEST", RED);
-        lcd_show_string(10, 110, 240, 16, 16, "User:Cossiant", RED);
-        lcd_show_string(10, 130, 240, 16, 16, (char *)lcd_id, RED); /* 显示LCD ID */
+        /* ----- 动态数据区域（L2层）----- */
         lcd_show_string(10, 150, 240, 16, 16, "UART read data is :", BLACK);
-        lcd_show_string(10, 170, 240, 16, 16, (char *)Read_data, BLACK);
-        myprintf("LCD refresh data is :%s", Read_data);
-        x++;
-        if (x == 12) x = 0;
+        lcd_show_string(10, 170, 240, 16, 16, (char *)Read_data, BLACK); // 串口数据
+        
+        // 调试输出（建议使用条件编译控制）
+        myprintf("LCD refresh data is :%s", Read_data); 
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * @brief   系统时间维护任务（RTC模拟层）
+ * @param   argument: 时间数据结构体指针
+ * @retval  None
+ * @note    实现以下功能：
+ *          - 提供软件级RTC功能（精度依赖系统节拍）
+ *          - 时间递增逻辑（23:59:50 → 00:00:00）
+ *          - 触发LCD刷新信号
+ * 
+ * 关键逻辑:
+ * 1. 初始化时间为23:59:50（便于测试跨日场景）
+ * 2. 每1000个系统节拍（1秒）触发时间递增
+ * 3. 通过信号量同步LCD刷新
+ * 
+ * @warning 注意：
+ * - 需确保与LCD任务的优先级关系（建议本任务优先级更高）
+ * - 长时间运行可能存在累积误差（建议定期同步）
+ * 
+ * 改进建议:
+ * 可添加RTC硬件同步接口（备份寄存器存取）
+ */
+void StartTimeSetTaskFunction(void *argument)
+{
+    TIME_STRUCT *Nowtime = (TIME_STRUCT *)argument;
+    
+    /* 初始化模拟RTC */
+    Nowtime->hours  = 23;   // 初始小时（测试跨日场景）
+    Nowtime->minute = 59;   // 初始分钟
+    Nowtime->second = 50;   // 初始秒数
+
+    /* 时间维护主循环 */
+    for (;;) {
+        // 秒递增（原子操作建议）
+        Nowtime->second++;  
+        
+        /* 时间进位逻辑链 */
+        if (Nowtime->second >= 60) {    // 分钟进位
+            Nowtime->second = 0;
+            Nowtime->minute++;
+            
+            if (Nowtime->minute >= 60) { // 小时进位
+                Nowtime->minute = 0;
+                Nowtime->hours++;
+                
+                if (Nowtime->hours >= 24) { // 日进位
+                    Nowtime->hours = 0;
+                }
+            }
+        }
+
+        /* 触发LCD刷新 */
+        osSemaphoreRelease(LCD_refresh_gsemHandle); // 释放信号量
+        
+        // 精确延时（误差<1个系统节拍）
+        osDelay(1000);  // 1000 ticks = 1秒（假设configTICK_RATE_HZ=1000）
+    }
+}

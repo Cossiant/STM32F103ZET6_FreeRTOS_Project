@@ -50,3 +50,4 @@ freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\inclu
 freertosstm32zet6\mytask.o: ../Core/Inc/dma.h
 freertosstm32zet6\mytask.o: ../Core/Inc/usart.h
 freertosstm32zet6\mytask.o: ../Core/Inc/user/delay.h
+freertosstm32zet6\mytask.o: ../Core/Inc/user/mytask.h
