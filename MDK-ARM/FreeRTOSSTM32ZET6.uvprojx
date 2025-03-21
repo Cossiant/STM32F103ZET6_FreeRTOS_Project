@@ -981,6 +981,11 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\user\delay.c</FilePath>
             </File>
+            <File>
+              <FileName>myprintf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\user\myprintf.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

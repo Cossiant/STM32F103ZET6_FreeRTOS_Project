@@ -42,3 +42,4 @@ freertosstm32zet6\freertos.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_
 freertosstm32zet6\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
 freertosstm32zet6\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 freertosstm32zet6\freertos.o: ../Core/Inc/user/mytask.h
+freertosstm32zet6\freertos.o: ../Core/Inc/user/myprintf.h

@@ -41,13 +41,15 @@ freertosstm32zet6\mytask.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_ti
 freertosstm32zet6\mytask.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 freertosstm32zet6\mytask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
 freertosstm32zet6\mytask.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
+freertosstm32zet6\mytask.o: ../Core/Inc/gpio.h
 freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
-freertosstm32zet6\mytask.o: ../Core/Inc/gpio.h
+freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\ctype.h
 freertosstm32zet6\mytask.o: ../Core/Inc/user/lcd.h
 freertosstm32zet6\mytask.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 freertosstm32zet6\mytask.o: ../Core/Inc/dma.h
 freertosstm32zet6\mytask.o: ../Core/Inc/usart.h
 freertosstm32zet6\mytask.o: ../Core/Inc/user/delay.h
 freertosstm32zet6\mytask.o: ../Core/Inc/user/mytask.h
+freertosstm32zet6\mytask.o: ../Core/Inc/user/myprintf.h
