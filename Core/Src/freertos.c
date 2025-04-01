@@ -97,6 +97,13 @@ const osThreadAttr_t BeepTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for Motor_one */
+osThreadId_t Motor_oneHandle;
+const osThreadAttr_t Motor_one_attributes = {
+  .name = "Motor_one",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for uart1_printf_gsem */
 osSemaphoreId_t uart1_printf_gsemHandle;
 const osSemaphoreAttr_t uart1_printf_gsem_attributes = {
@@ -117,6 +124,11 @@ osSemaphoreId_t Beep_control_gsemHandle;
 const osSemaphoreAttr_t Beep_control_gsem_attributes = {
   .name = "Beep_control_gsem"
 };
+/* Definitions for Motor_one_control_gsem */
+osSemaphoreId_t Motor_one_control_gsemHandle;
+const osSemaphoreAttr_t Motor_one_control_gsem_attributes = {
+  .name = "Motor_one_control_gsem"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -130,6 +142,7 @@ extern void StartLEDProcessedTaskFunction(void *argument);
 extern void StartLEDWorkTaskFunction(void *argument);
 extern void StartTimeSetTaskFunction(void *argument);
 extern void StartBeepTaskFunction(void *argument);
+extern void StartMotor_oneFunction(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -160,6 +173,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Beep_control_gsem */
   Beep_control_gsemHandle = osSemaphoreNew(1, 1, &Beep_control_gsem_attributes);
+
+  /* creation of Motor_one_control_gsem */
+  Motor_one_control_gsemHandle = osSemaphoreNew(1, 1, &Motor_one_control_gsem_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
     /* add semaphores, ... */
@@ -194,6 +210,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of BeepTask */
   BeepTaskHandle = osThreadNew(StartBeepTaskFunction, (void*) &sys_use_data, &BeepTask_attributes);
+
+  /* creation of Motor_one */
+  Motor_oneHandle = osThreadNew(StartMotor_oneFunction, (void*) &sys_use_data, &Motor_one_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */

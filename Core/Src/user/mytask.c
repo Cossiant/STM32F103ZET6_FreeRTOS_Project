@@ -49,6 +49,7 @@
 
 extern osSemaphoreId_t LCD_refresh_gsemHandle;
 extern osSemaphoreId_t Beep_control_gsemHandle;
+extern osSemaphoreId_t Motor_one_control_gsemHandle;
 
 // LED控制标志位
 // 拥有参数LED_AUTO,LED_ON,LED_OFF
@@ -59,6 +60,17 @@ enum {
     LED_Artificial
 } LED_Conctrl_MOD;
 unsigned char LED_Conctrl_num = LED_AUTO;
+
+enum {
+    MOTOR_AUTO,
+    MOTOR_OFF,
+    MOTOR_ON
+} MOTOR_Control_Num;
+
+enum {
+    Motor_Left,
+    Motor_Right
+} MOTOR_Control_direction;
 
 /**
  * @brief   多协议指令处理中枢
@@ -119,6 +131,65 @@ void StartLEDProcessedTaskFunction(void *argument)
         } else if (strncmp(SYS->usart_use_data.Response_Read_data, "BEEP_OFF", 8) == 0) {
             myprintf("Now Beep OFF");
             SYS->Beep_use_data.Response_time = 0; // 立即停止标识
+        }
+        // ==================== 电机控制指令处理 ====================
+
+        if (strncmp(SYS->usart_use_data.Response_Read_data, "MOTOR_LEFT", 10) == 0) {
+            /* 参数提取算法（支持嵌入数字） */
+            for (int i = 0; SYS->usart_use_data.Response_Read_data[i] != '\0'; i++) {
+                if (isdigit(SYS->usart_use_data.Response_Read_data[i])) {
+                    output_num = output_num * 10 + (SYS->usart_use_data.Response_Read_data[i] - '0');
+                }
+            }
+            myprintf("Now Motor LEFT");
+            SYS->Motor_one.speed     = output_num;
+            SYS->Motor_one.start     = MOTOR_ON;
+            SYS->Motor_one.direction = Motor_Left;
+            output_num               = 0; // 重置临时变量
+            osSemaphoreRelease(LCD_refresh_gsemHandle);
+        } else if (strncmp(SYS->usart_use_data.Response_Read_data, "MOTOR_RIGHT", 11) == 0) {
+            /* 参数提取算法（支持嵌入数字） */
+            for (int i = 0; SYS->usart_use_data.Response_Read_data[i] != '\0'; i++) {
+                if (isdigit(SYS->usart_use_data.Response_Read_data[i])) {
+                    output_num = output_num * 10 + (SYS->usart_use_data.Response_Read_data[i] - '0');
+                }
+            }
+            myprintf("Now Motor LEFT");
+            SYS->Motor_one.speed     = output_num;
+            SYS->Motor_one.start     = MOTOR_ON;
+            SYS->Motor_one.direction = Motor_Right;
+            output_num               = 0; // 重置临时变量
+            osSemaphoreRelease(LCD_refresh_gsemHandle);
+        } else if (strncmp(SYS->usart_use_data.Response_Read_data, "MOTOR_AUTO_LEFT", 15) == 0) {
+            /* 参数提取算法（支持嵌入数字） */
+            for (int i = 0; SYS->usart_use_data.Response_Read_data[i] != '\0'; i++) {
+                if (isdigit(SYS->usart_use_data.Response_Read_data[i])) {
+                    output_num = output_num * 10 + (SYS->usart_use_data.Response_Read_data[i] - '0');
+                }
+            }
+            myprintf("Now Motor AUTO LEFT");
+            SYS->Motor_one.start     = MOTOR_AUTO;
+            SYS->Motor_one.direction = Motor_Left;
+            SYS->Motor_one.laps_num  = output_num * 64 / 45;
+            output_num               = 0; // 重置临时变量
+            osSemaphoreRelease(LCD_refresh_gsemHandle);
+        } else if (strncmp(SYS->usart_use_data.Response_Read_data, "MOTOR_AUTO_RIGHT", 16) == 0) {
+            /* 参数提取算法（支持嵌入数字） */
+            for (int i = 0; SYS->usart_use_data.Response_Read_data[i] != '\0'; i++) {
+                if (isdigit(SYS->usart_use_data.Response_Read_data[i])) {
+                    output_num = output_num * 10 + (SYS->usart_use_data.Response_Read_data[i] - '0');
+                }
+            }
+            myprintf("Now Motor AUTO RIGHT");
+            SYS->Motor_one.start     = MOTOR_AUTO;
+            SYS->Motor_one.direction = Motor_Right;
+            SYS->Motor_one.laps_num  = output_num * 64 / 45;
+            output_num               = 0; // 重置临时变量
+            osSemaphoreRelease(LCD_refresh_gsemHandle);
+        } else if (strncmp(SYS->usart_use_data.Response_Read_data, "MOTOR_OFF", 9) == 0) {
+            myprintf("Now Motor OFF");
+            SYS->Motor_one.speed = 10;
+            SYS->Motor_one.start = MOTOR_OFF;
         }
         /* 指令缓冲区安全擦除 */
         memset(SYS->usart_use_data.Response_Read_data, 0, UART1_DMA_RX_LEN);
@@ -224,13 +295,17 @@ void StartLCDDisplayTaskFunction(void *argument)
         /* ----- 动态数据区域（L2层）----- */
         lcd_show_string(10, 150, 240, 16, 16, "UART read data is :", BLACK);
         lcd_show_string(10, 190, 240, 16, 16, "BEEP response time is :", BLACK);
+        lcd_show_string(10, 230, 240, 16, 16, "Motor Num is:", BLACK);
         if (strcmp(SYS->usart_use_data.Read_data, SYS->usart_use_data.Last_Read_data) != 0) {
-            lcd_show_string(10, 170, 240, 16, 16, "            ", BLACK);                        // 清空当前行显示
+            lcd_show_string(10, 170, 240, 16, 16, "              ", BLACK);                      // 清空当前行显示
             lcd_show_string(10, 170, 240, 16, 16, (char *)SYS->usart_use_data.Read_data, BLACK); // 串口数据
             strcpy(SYS->usart_use_data.Read_data, SYS->usart_use_data.Last_Read_data);           // 将上次接受的数据改为当前数据
 
-            lcd_show_string(10, 210, 240, 16, 16, "            ", BLACK); // 清空当前行显示
+            lcd_show_string(10, 210, 240, 16, 16, "              ", BLACK); // 清空当前行显示
             lcd_show_num(10, 210, SYS->Beep_use_data.Response_time, 4, 16, BLACK);
+
+            lcd_show_string(10, 250, 240, 16, 16, "              ", BLACK); // 清空当前行显示
+            lcd_show_num(10, 250, SYS->Motor_one.speed, 5, 16, BLACK);
         }
         // 调试输出（建议使用条件编译控制）
         // myprintf("LCD refresh data is :%s", SYS->usart_use_data.Read_data);
@@ -302,7 +377,7 @@ void StartTimeSetTaskFunction(void *argument)
  * @note    工作模式：
  *          - 正常模式：按照设定时间循环鸣叫（鸣叫时间/间隔时间=1:9）
  *          - 紧急停止：立即终止当前操作
- * 
+ *
  * 硬件保护机制：
  *          +----------------+---------------------+-----------------------+
  *          | 参数            | 限制范围            | 保护措施              |
@@ -311,29 +386,164 @@ void StartTimeSetTaskFunction(void *argument)
  *          | 占空比         | ≤10%               | 硬件PWM限制            |
  *          | 最大电流        | 20mA               | 串联电阻保护           |
  *          +----------------+---------------------+-----------------------+
- * 
+ *
  * @warning 音频参数：
  *          - 驱动频率：4KHz ±5%（TIM4_CH2生成）
  *          - 声压级：85dB @10cm（需符合工业安全标准）
  */
 void StartBeepTaskFunction(void *argument)
 {
-    SYS_USE_DATA *SYS = (SYS_USE_DATA *)argument;
+    SYS_USE_DATA *SYS                = (SYS_USE_DATA *)argument;
     SYS->Beep_use_data.Response_time = 0; // 初始化安全状态
-    
+
     for (;;) {
         if (SYS->Beep_use_data.Response_time != 0) {
             /* 激活蜂鸣器（带硬件互锁保护） */
             HAL_GPIO_WritePin(Beep1_GPIO_Port, Beep1_Pin, GPIO_PIN_SET); // 启动鸣叫
-            osDelay(SYS->Beep_use_data.Response_time); // 持续时长
-            
+            osDelay(SYS->Beep_use_data.Response_time);                   // 持续时长
+
             /* 关闭蜂鸣器（最小间隔保护） */
-            HAL_GPIO_WritePin(Beep1_GPIO_Port, Beep1_Pin, GPIO_PIN_RESET); 
+            HAL_GPIO_WritePin(Beep1_GPIO_Port, Beep1_Pin, GPIO_PIN_RESET);
             osDelay(1000 - SYS->Beep_use_data.Response_time); // 维持周期1秒
-        } 
-        else {
+        } else {
             /* 空闲状态低功耗模式 */
             osDelay(100); // 降低CPU占用率
+        }
+    }
+}
+void Motor_one_1step(SYS_USE_DATA *SYS)
+{
+    switch (SYS->Motor_one.direction_num) {
+        case 1:
+            HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_RESET);
+            break;
+        case 2:
+            HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_RESET);
+            break;
+        case 3:
+            HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_RESET);
+            break;
+        case 4:
+            HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_RESET);
+            break;
+    }
+    if (SYS->Motor_one.direction == Motor_Left) {
+        SYS->Motor_one.direction_num++;
+        if (SYS->Motor_one.direction_num == 5) {
+            SYS->Motor_one.direction_num = 1;
+        }
+    } else if (SYS->Motor_one.direction == Motor_Right) {
+        SYS->Motor_one.direction_num--;
+        if (SYS->Motor_one.direction_num == 0) {
+            SYS->Motor_one.direction_num = 4;
+        }
+    }
+}
+
+void Motor_one_2step(SYS_USE_DATA *SYS)
+{
+    for (unsigned char i = 0; i < 8; i++) {
+        switch (SYS->Motor_one.direction_num) {
+            case 1:
+                HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_RESET);
+                break;
+            case 2:
+                HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_RESET);
+                break;
+            case 3:
+                HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_RESET);
+                break;
+            case 4:
+                HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_RESET);
+                break;
+            case 5:
+                HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_RESET);
+                break;
+            case 6:
+                HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_SET);
+                break;
+            case 7:
+                HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_SET);
+                break;
+            case 8:
+                HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_SET);
+                break;
+        }
+        if (SYS->Motor_one.direction == Motor_Left) {
+            SYS->Motor_one.direction_num++;
+            if (SYS->Motor_one.direction_num == 9) {
+                SYS->Motor_one.direction_num = 1;
+            }
+        } else if (SYS->Motor_one.direction == Motor_Right) {
+            SYS->Motor_one.direction_num--;
+            if (SYS->Motor_one.direction_num == 0) {
+                SYS->Motor_one.direction_num = 8;
+            }
+        }
+        osDelay(SYS->Motor_one.speed);
+    }
+}
+
+void Motor_one_AUTOFunction(SYS_USE_DATA *SYS)
+{
+    Motor_one_2step(SYS);
+    SYS->Motor_one.laps_num--;
+    if (SYS->Motor_one.laps_num == 0) {
+        SYS->Motor_one.start = MOTOR_OFF;
+    }
+}
+
+void StartMotor_oneFunction(void *argument)
+{
+    SYS_USE_DATA *SYS            = (SYS_USE_DATA *)argument;
+    SYS->Motor_one.speed         = 3;
+    SYS->Motor_one.start         = MOTOR_OFF;
+    SYS->Motor_one.direction     = Motor_Left;
+    SYS->Motor_one.direction_num = 1;
+    SYS->Motor_one.laps_num      = 0;
+    for (;;) {
+        if (SYS->Motor_one.start == MOTOR_ON) {
+            Motor_one_2step(SYS);
+        } else if (SYS->Motor_one.start == MOTOR_AUTO) {
+            Motor_one_AUTOFunction(SYS);
+        } else {
+            osDelay(SYS->Motor_one.speed);
         }
     }
 }
