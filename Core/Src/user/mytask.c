@@ -60,13 +60,17 @@ enum {
     LED_Artificial
 } LED_Conctrl_MOD;
 unsigned char LED_Conctrl_num = LED_AUTO;
-
+// 电机控制标志位
+// 拥有电机自动模式、电机停止、电机一直开启
+// 注意！这个标志位将会在不久被优化掉
 enum {
     MOTOR_AUTO,
     MOTOR_OFF,
     MOTOR_ON
 } MOTOR_Control_Num;
-
+// 电机方向标志位
+// 拥有电机逆时针旋转、电机顺时针旋转
+// 注意！这个标志位将会在不久被优化掉
 enum {
     Motor_Left,
     Motor_Right
@@ -411,10 +415,16 @@ void StartBeepTaskFunction(void *argument)
         }
     }
 }
-void Motor_one_1step(SYS_USE_DATA *SYS)
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 注意！以下代码为测试代码，现在可以实现单个电机的控制，但是我正在尝试将其拓展到多个电机同时工作
+// 所以以下代码随时有可能被更改，请酌情使用
+// 电机1步进函数
+void Motor_one_1step(MOTOR_USE_DATA *motor)
 {
-    switch (SYS->Motor_one.direction_num) {
+    switch (motor->direction_num) {
+        // 注意！这个switch函数需要进行修改！目前这个函数支支持单个电机运行！
         case 1:
+        // 应该根据不同电机ID进行不同的控制！要注意这个问题，需要重构
             HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_SET);
             HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_RESET);
             HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_RESET);
@@ -439,23 +449,23 @@ void Motor_one_1step(SYS_USE_DATA *SYS)
             HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_RESET);
             break;
     }
-    if (SYS->Motor_one.direction == Motor_Left) {
-        SYS->Motor_one.direction_num++;
-        if (SYS->Motor_one.direction_num == 5) {
-            SYS->Motor_one.direction_num = 1;
+    if (motor->direction == Motor_Left) {
+        motor->direction_num++;
+        if (motor->direction_num == 5) {
+            motor->direction_num = 1;
         }
-    } else if (SYS->Motor_one.direction == Motor_Right) {
-        SYS->Motor_one.direction_num--;
-        if (SYS->Motor_one.direction_num == 0) {
-            SYS->Motor_one.direction_num = 4;
+    } else if (motor->direction == Motor_Right) {
+        motor->direction_num--;
+        if (motor->direction_num == 0) {
+            motor->direction_num = 4;
         }
     }
 }
-
-void Motor_one_2step(SYS_USE_DATA *SYS)
+// 2步进
+void Motor_one_2step(MOTOR_USE_DATA *motor)
 {
     for (unsigned char i = 0; i < 8; i++) {
-        switch (SYS->Motor_one.direction_num) {
+        switch (motor->direction_num) {
             case 1:
                 HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_SET);
                 HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_RESET);
@@ -505,45 +515,45 @@ void Motor_one_2step(SYS_USE_DATA *SYS)
                 HAL_GPIO_WritePin(Motor_one_IN4_GPIO_Port, Motor_one_IN4_Pin, GPIO_PIN_SET);
                 break;
         }
-        if (SYS->Motor_one.direction == Motor_Left) {
-            SYS->Motor_one.direction_num++;
-            if (SYS->Motor_one.direction_num == 9) {
-                SYS->Motor_one.direction_num = 1;
+        if (motor->direction == Motor_Left) {
+            motor->direction_num++;
+            if (motor->direction_num == 9) {
+                motor->direction_num = 1;
             }
-        } else if (SYS->Motor_one.direction == Motor_Right) {
-            SYS->Motor_one.direction_num--;
-            if (SYS->Motor_one.direction_num == 0) {
-                SYS->Motor_one.direction_num = 8;
+        } else if (motor->direction == Motor_Right) {
+            motor->direction_num--;
+            if (motor->direction_num == 0) {
+                motor->direction_num = 8;
             }
         }
-        osDelay(SYS->Motor_one.speed);
+        osDelay(motor->speed);
     }
 }
-
+// 电机自动模式
 void Motor_one_AUTOFunction(SYS_USE_DATA *SYS)
 {
-    Motor_one_2step(SYS);
-    SYS->Motor_one.laps_num--;
-    if (SYS->Motor_one.laps_num == 0) {
-        SYS->Motor_one.start = MOTOR_OFF;
+    Motor_one_2step(&(SYS->MOTOR_type.MOTOR1));
+    SYS->MOTOR_type.MOTOR1.laps_num--;
+    if (SYS->MOTOR_type.MOTOR1.laps_num == 0) {
+        SYS->MOTOR_type.MOTOR1.laps_num = MOTOR_OFF;
     }
 }
-
+// 启动电机1函数（需要进行大改动，并在不久将会被删除）
 void StartMotor_oneFunction(void *argument)
 {
     SYS_USE_DATA *SYS            = (SYS_USE_DATA *)argument;
-    SYS->Motor_one.speed         = 3;
-    SYS->Motor_one.start         = MOTOR_OFF;
-    SYS->Motor_one.direction     = Motor_Left;
-    SYS->Motor_one.direction_num = 1;
-    SYS->Motor_one.laps_num      = 0;
+    SYS->MOTOR_type.MOTOR1.speed         = 3;
+    SYS->MOTOR_type.MOTOR1.start         = MOTOR_OFF;
+    SYS->MOTOR_type.MOTOR1.direction     = Motor_Left;
+    SYS->MOTOR_type.MOTOR1.direction_num = 1;
+    SYS->MOTOR_type.MOTOR1.laps_num      = 0;
     for (;;) {
-        if (SYS->Motor_one.start == MOTOR_ON) {
-            Motor_one_2step(SYS);
-        } else if (SYS->Motor_one.start == MOTOR_AUTO) {
+        if (SYS->MOTOR_type.MOTOR1.start == MOTOR_ON) {
+            Motor_one_2step(&(SYS->MOTOR_type.MOTOR1));
+        } else if (SYS->MOTOR_type.MOTOR1.start == MOTOR_AUTO) {
             Motor_one_AUTOFunction(SYS);
         } else {
-            osDelay(SYS->Motor_one.speed);
+            osDelay(SYS->MOTOR_type.MOTOR1.speed);
         }
     }
 }

@@ -25,12 +25,12 @@ typedef struct {
     char Last_Read_data[UART1_DMA_RX_LEN]; //!< 历史数据缓存（用于对比变更）
     char Response_Read_data[UART1_DMA_RX_LEN];
 } USART_USE_DATA;
-
+//蜂鸣器响应时间
 typedef struct
 {
     int Response_time;
 } BEEP_USE_DATA;
-
+// 每个电机对应的操作数据
 typedef struct
 {
     int speed;                   // 速度变量
@@ -39,6 +39,14 @@ typedef struct
     unsigned char direction;     // 方向变量
     unsigned char direction_num; // 方向选择中间变量
 } MOTOR_USE_DATA;
+// 在这里定义所有已有的电机
+typedef struct
+{
+    MOTOR_USE_DATA MOTOR1;
+    MOTOR_USE_DATA MOTOR2;
+    MOTOR_USE_DATA MOTOR3;
+} MOTOR_USE_TYPE;
+
 
 /**
  * @brief  系统核心数据聚合结构体
@@ -48,9 +56,8 @@ typedef struct {
     TIME_USE_DATA Time_use_data;   //!< 时间管理系统（RTC模拟层）
     USART_USE_DATA usart_use_data; //!< 通信数据管理系统
     BEEP_USE_DATA Beep_use_data;
-    MOTOR_USE_DATA Motor_one;
+    MOTOR_USE_TYPE MOTOR_type;
 } SYS_USE_DATA;
-
 
 
 void StartLEDProcessedTaskFunction(void *argument);
