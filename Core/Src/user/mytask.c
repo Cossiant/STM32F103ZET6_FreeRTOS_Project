@@ -146,10 +146,10 @@ void StartLEDProcessedTaskFunction(void *argument)
                 }
             }
             myprintf("Now Motor LEFT");
-            SYS->Motor_one.speed     = output_num;
-            SYS->Motor_one.start     = MOTOR_ON;
-            SYS->Motor_one.direction = Motor_Left;
-            output_num               = 0; // 重置临时变量
+            SYS->MOTOR_type.MOTOR1.speed     = output_num;
+            SYS->MOTOR_type.MOTOR1.start     = MOTOR_ON;
+            SYS->MOTOR_type.MOTOR1.direction = Motor_Left;
+            output_num                       = 0; // 重置临时变量
             osSemaphoreRelease(LCD_refresh_gsemHandle);
         } else if (strncmp(SYS->usart_use_data.Response_Read_data, "MOTOR_RIGHT", 11) == 0) {
             /* 参数提取算法（支持嵌入数字） */
@@ -159,10 +159,10 @@ void StartLEDProcessedTaskFunction(void *argument)
                 }
             }
             myprintf("Now Motor LEFT");
-            SYS->Motor_one.speed     = output_num;
-            SYS->Motor_one.start     = MOTOR_ON;
-            SYS->Motor_one.direction = Motor_Right;
-            output_num               = 0; // 重置临时变量
+            SYS->MOTOR_type.MOTOR1.speed     = output_num;
+            SYS->MOTOR_type.MOTOR1.start     = MOTOR_ON;
+            SYS->MOTOR_type.MOTOR1.direction = Motor_Right;
+            output_num                       = 0; // 重置临时变量
             osSemaphoreRelease(LCD_refresh_gsemHandle);
         } else if (strncmp(SYS->usart_use_data.Response_Read_data, "MOTOR_AUTO_LEFT", 15) == 0) {
             /* 参数提取算法（支持嵌入数字） */
@@ -172,10 +172,10 @@ void StartLEDProcessedTaskFunction(void *argument)
                 }
             }
             myprintf("Now Motor AUTO LEFT");
-            SYS->Motor_one.start     = MOTOR_AUTO;
-            SYS->Motor_one.direction = Motor_Left;
-            SYS->Motor_one.laps_num  = output_num * 64 / 45;
-            output_num               = 0; // 重置临时变量
+            SYS->MOTOR_type.MOTOR1.start     = MOTOR_AUTO;
+            SYS->MOTOR_type.MOTOR1.direction = Motor_Left;
+            SYS->MOTOR_type.MOTOR1.laps_num  = output_num * 64 / 45;
+            output_num                       = 0; // 重置临时变量
             osSemaphoreRelease(LCD_refresh_gsemHandle);
         } else if (strncmp(SYS->usart_use_data.Response_Read_data, "MOTOR_AUTO_RIGHT", 16) == 0) {
             /* 参数提取算法（支持嵌入数字） */
@@ -185,15 +185,15 @@ void StartLEDProcessedTaskFunction(void *argument)
                 }
             }
             myprintf("Now Motor AUTO RIGHT");
-            SYS->Motor_one.start     = MOTOR_AUTO;
-            SYS->Motor_one.direction = Motor_Right;
-            SYS->Motor_one.laps_num  = output_num * 64 / 45;
-            output_num               = 0; // 重置临时变量
+            SYS->MOTOR_type.MOTOR1.start     = MOTOR_AUTO;
+            SYS->MOTOR_type.MOTOR1.direction = Motor_Right;
+            SYS->MOTOR_type.MOTOR1.laps_num  = output_num * 64 / 45;
+            output_num                       = 0; // 重置临时变量
             osSemaphoreRelease(LCD_refresh_gsemHandle);
         } else if (strncmp(SYS->usart_use_data.Response_Read_data, "MOTOR_OFF", 9) == 0) {
             myprintf("Now Motor OFF");
-            SYS->Motor_one.speed = 10;
-            SYS->Motor_one.start = MOTOR_OFF;
+            SYS->MOTOR_type.MOTOR1.speed = 10;
+            SYS->MOTOR_type.MOTOR1.start = MOTOR_OFF;
         }
         /* 指令缓冲区安全擦除 */
         memset(SYS->usart_use_data.Response_Read_data, 0, UART1_DMA_RX_LEN);
@@ -309,7 +309,7 @@ void StartLCDDisplayTaskFunction(void *argument)
             lcd_show_num(10, 210, SYS->Beep_use_data.Response_time, 4, 16, BLACK);
 
             lcd_show_string(10, 250, 240, 16, 16, "              ", BLACK); // 清空当前行显示
-            lcd_show_num(10, 250, SYS->Motor_one.speed, 5, 16, BLACK);
+            lcd_show_num(10, 250, SYS->MOTOR_type.MOTOR1.speed, 5, 16, BLACK);
         }
         // 调试输出（建议使用条件编译控制）
         // myprintf("LCD refresh data is :%s", SYS->usart_use_data.Read_data);
@@ -424,7 +424,7 @@ void Motor_one_1step(MOTOR_USE_DATA *motor)
     switch (motor->direction_num) {
         // 注意！这个switch函数需要进行修改！目前这个函数支支持单个电机运行！
         case 1:
-        // 应该根据不同电机ID进行不同的控制！要注意这个问题，需要重构
+            // 应该根据不同电机ID进行不同的控制！要注意这个问题，需要重构
             HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_SET);
             HAL_GPIO_WritePin(Motor_one_IN2_GPIO_Port, Motor_one_IN2_Pin, GPIO_PIN_RESET);
             HAL_GPIO_WritePin(Motor_one_IN3_GPIO_Port, Motor_one_IN3_Pin, GPIO_PIN_RESET);
@@ -541,19 +541,29 @@ void Motor_one_AUTOFunction(SYS_USE_DATA *SYS)
 // 启动电机1函数（需要进行大改动，并在不久将会被删除）
 void StartMotor_oneFunction(void *argument)
 {
-    SYS_USE_DATA *SYS            = (SYS_USE_DATA *)argument;
-    SYS->MOTOR_type.MOTOR1.speed         = 3;
-    SYS->MOTOR_type.MOTOR1.start         = MOTOR_OFF;
-    SYS->MOTOR_type.MOTOR1.direction     = Motor_Left;
-    SYS->MOTOR_type.MOTOR1.direction_num = 1;
-    SYS->MOTOR_type.MOTOR1.laps_num      = 0;
+    // SYS_USE_DATA *SYS            = (SYS_USE_DATA *)argument;
+    // SYS->MOTOR_type.MOTOR1.speed         = 3;
+    // SYS->MOTOR_type.MOTOR1.start         = MOTOR_OFF;
+    // SYS->MOTOR_type.MOTOR1.direction     = Motor_Left;
+    // SYS->MOTOR_type.MOTOR1.direction_num = 1;
+    // SYS->MOTOR_type.MOTOR1.laps_num      = 0;
+    // for (;;) {
+    //     if (SYS->MOTOR_type.MOTOR1.start == MOTOR_ON) {
+    //         Motor_one_2step(&(SYS->MOTOR_type.MOTOR1));
+    //     } else if (SYS->MOTOR_type.MOTOR1.start == MOTOR_AUTO) {
+    //         Motor_one_AUTOFunction(SYS);
+    //     } else {
+    //         osDelay(SYS->MOTOR_type.MOTOR1.speed);
+    //     }
+    // }
+
     for (;;) {
-        if (SYS->MOTOR_type.MOTOR1.start == MOTOR_ON) {
-            Motor_one_2step(&(SYS->MOTOR_type.MOTOR1));
-        } else if (SYS->MOTOR_type.MOTOR1.start == MOTOR_AUTO) {
-            Motor_one_AUTOFunction(SYS);
-        } else {
-            osDelay(SYS->MOTOR_type.MOTOR1.speed);
+        for (int i = 0; i < 800; i++) {
+            HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_SET);
+            osDelay(1);
+            HAL_GPIO_WritePin(Motor_one_IN1_GPIO_Port, Motor_one_IN1_Pin, GPIO_PIN_RESET);
+            osDelay(1);
         }
+        osDelay(1000);
     }
 }

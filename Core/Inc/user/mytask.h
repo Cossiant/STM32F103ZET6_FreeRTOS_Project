@@ -65,7 +65,7 @@ void StartLEDWorkTaskFunction(void *argument);
 void StartLCDDisplayTaskFunction(void *argument);
 void StartTimeSetTaskFunction(void *argument);
 void StartBeepTaskFunction(void *argument);
-void Motor_one_1step(SYS_USE_DATA *SYS);
+void Motor_one_1step(MOTOR_USE_DATA *motor);
 void Motor_one_AUTOFunction(SYS_USE_DATA *SYS);
 void StartMotor_oneFunction(void *argument);
 
