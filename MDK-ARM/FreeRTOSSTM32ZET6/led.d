@@ -42,7 +42,7 @@ freertosstm32zet6\led.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.
 freertosstm32zet6\led.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
 freertosstm32zet6\led.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 freertosstm32zet6\led.o: ../Core/Inc/gpio.h
-freertosstm32zet6\led.o: ../Core/Inc/user/mytask.h
 freertosstm32zet6\led.o: ../Core/Inc/user/my_sys_data.h
 freertosstm32zet6\led.o: ../Core/Inc/user/led.h
 freertosstm32zet6\led.o: ../Core/Inc/user/myprintf.h
+freertosstm32zet6\led.o: ../Core/Inc/user/beep.h

@@ -55,3 +55,4 @@ freertosstm32zet6\mytask.o: ../Core/Inc/user/mytask.h
 freertosstm32zet6\mytask.o: ../Core/Inc/user/my_sys_data.h
 freertosstm32zet6\mytask.o: ../Core/Inc/user/led.h
 freertosstm32zet6\mytask.o: ../Core/Inc/user/myprintf.h
+freertosstm32zet6\mytask.o: ../Core/Inc/user/beep.h

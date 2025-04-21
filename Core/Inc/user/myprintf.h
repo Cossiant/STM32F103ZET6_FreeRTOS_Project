@@ -3,9 +3,6 @@
 
 // 注意这里定义的数据发送和接受长度一定要足够！例如LED_AUTO就需要8*8=64！
 #define UART1_DMA_RX_LEN 70
-#define Set_Time_hours   23
-#define Set_Time_minute  59
-#define Set_Time_second  50
 
 /**
  * @brief  UART通信数据管理结构体

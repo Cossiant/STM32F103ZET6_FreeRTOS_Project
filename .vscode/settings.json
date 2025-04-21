@@ -2,6 +2,9 @@
   "files.associations": {
     "led.h": "c",
     "mytask.h": "c",
-    "my_sys_data.h": "c"
+    "my_sys_data.h": "c",
+    "beep.h": "c",
+    "myprintf.h": "c",
+    "freertos.h": "c"
   }
 }

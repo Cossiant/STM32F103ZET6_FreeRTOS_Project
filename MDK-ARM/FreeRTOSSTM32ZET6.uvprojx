@@ -991,6 +991,11 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\user\led.c</FilePath>
             </File>
+            <File>
+              <FileName>beep.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\user\beep.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

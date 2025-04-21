@@ -44,6 +44,7 @@
 "freertosstm32zet6\delay.o"
 "freertosstm32zet6\myprintf.o"
 "freertosstm32zet6\led.o"
+"freertosstm32zet6\beep.o"
 --strict --scatter "FreeRTOSSTM32ZET6\FreeRTOSSTM32ZET6.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

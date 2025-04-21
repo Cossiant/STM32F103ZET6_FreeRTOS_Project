@@ -89,6 +89,13 @@ const osThreadAttr_t TimeSetTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for BeepWorkTask */
+osThreadId_t BeepWorkTaskHandle;
+const osThreadAttr_t BeepWorkTask_attributes = {
+  .name = "BeepWorkTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for uart1_printf_gsem */
 osSemaphoreId_t uart1_printf_gsemHandle;
 const osSemaphoreAttr_t uart1_printf_gsem_attributes = {
@@ -116,6 +123,7 @@ extern void StartLCDDisplayTaskFunction(void *argument);
 extern void StartLEDProcessedTaskFunction(void *argument);
 extern void StartLEDWorkTaskFunction(void *argument);
 extern void StartTimeSetTaskFunction(void *argument);
+extern void StartBeepWorkTaskFunction(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -174,6 +182,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of TimeSetTask */
   TimeSetTaskHandle = osThreadNew(StartTimeSetTaskFunction, (void*) &sys_use_data, &TimeSetTask_attributes);
+
+  /* creation of BeepWorkTask */
+  BeepWorkTaskHandle = osThreadNew(StartBeepWorkTaskFunction, (void*) &sys_use_data, &BeepWorkTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */

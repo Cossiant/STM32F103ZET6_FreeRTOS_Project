@@ -74,6 +74,7 @@ void StartLEDProcessedTaskFunction(void *argument)
 {
     SYS_USE_DATA *SYS = (SYS_USE_DATA *)argument;
     /* 指令处理主循环 */
+    // 注：在myprintf的时候LCD信号量已经自动释放，所以不需要额外添加LCD刷新
     for (;;) {
         // ==================== LED指令处理 ====================
         if (strcmp(SYS->usart_use_data.Response_Read_data, "LED_AUTO") == 0) {
@@ -86,13 +87,30 @@ void StartLEDProcessedTaskFunction(void *argument)
             myprintf("Now LED ON");
             SYS->led_control_num.Led_num = LED_ON;
         }
-        
+        // ==================== 蜂鸣器指令处理 ====================
+        if (strncmp(SYS->usart_use_data.Response_Read_data, "BEEP_ON", 7) == 0) {
+            myprintf("Now BEEP ON");
+            // 定义一个临时接收变量
+            char param_str[UART1_DMA_RX_LEN - 7];
+            // 将剩余字符读出来到这个接受变量
+            strcpy(param_str, SYS->usart_use_data.Response_Read_data + 7);
+            // 定义读出来的数字变量
+            unsigned int read_data_num = 0;
+            // 将读出来的字符数字送给这个数字变量
+            sscanf(param_str, "%u", &read_data_num);
+            // 将其送给系统变量，以供调用
+            SYS->Beep_control.Beep_control_num = BEEP_AUTO;
+            SYS->Beep_control.Beep_delay_num = read_data_num;
+        } else if (strncmp(SYS->usart_use_data.Response_Read_data, "BEEP_OFF", 8) == 0) {
+            myprintf("Now BEEP OFF");
+            SYS->Beep_control.Beep_control_num = BEEP_OFF;
+            SYS->Beep_control.Beep_delay_num = 0;
+        }
         /* 指令缓冲区安全擦除 */
         memset(SYS->usart_use_data.Response_Read_data, 0, UART1_DMA_RX_LEN);
         osDelay(100); // 指令轮询间隔
     }
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -156,6 +174,10 @@ void StartLCDDisplayTaskFunction(void *argument)
             lcd_show_string(10, 170, 240, 16, 16, "              ", BLACK);                      // 清空当前行显示
             lcd_show_string(10, 170, 240, 16, 16, (char *)SYS->usart_use_data.Read_data, BLACK); // 串口数据
             strcpy(SYS->usart_use_data.Read_data, SYS->usart_use_data.Last_Read_data);           // 将上次接受的数据改为当前数据
+
+            lcd_show_string(10, 190, 240, 16, 16, "Beep read data is :", BLACK);
+            lcd_show_string(10, 210, 240, 16, 16, "              ", BLACK);                     // 清空当前行显示
+            lcd_show_xnum(10, 210, SYS->Beep_control.Beep_delay_num, 4, 16, 0X80, BLACK); // 读取出来的Beep延时数据（单位ms）
         }
         // 调试输出（建议使用条件编译控制）
         // myprintf("LCD refresh data is :%s", SYS->usart_use_data.Read_data);

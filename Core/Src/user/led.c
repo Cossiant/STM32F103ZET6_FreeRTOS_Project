@@ -4,7 +4,7 @@
 #include "cmsis_os.h"
 #include "gpio.h"
 
-#include "mytask.h"
+#include "my_sys_data.h"
 
 /**
  * @brief   LED控制任务（主状态指示灯）
