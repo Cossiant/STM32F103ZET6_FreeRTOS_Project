@@ -46,4 +46,6 @@ freertosstm32zet6\myprintf.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\inc
 freertosstm32zet6\myprintf.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 freertosstm32zet6\myprintf.o: ../Core/Inc/gpio.h
 freertosstm32zet6\myprintf.o: ../Core/Inc/user/mytask.h
+freertosstm32zet6\myprintf.o: ../Core/Inc/user/my_sys_data.h
+freertosstm32zet6\myprintf.o: ../Core/Inc/user/led.h
 freertosstm32zet6\myprintf.o: ../Core/Inc/user/myprintf.h

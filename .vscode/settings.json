@@ -1,1 +1,7 @@
-{}
+{
+  "files.associations": {
+    "led.h": "c",
+    "mytask.h": "c",
+    "my_sys_data.h": "c"
+  }
+}
