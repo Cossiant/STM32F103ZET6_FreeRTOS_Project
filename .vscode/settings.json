@@ -6,6 +6,11 @@
     "beep.h": "c",
     "myprintf.h": "c",
     "freertos.h": "c",
-    "remote.h": "c"
+    "remote.h": "c",
+    "lcd.h": "c",
+    "task.h": "c",
+    "cmsis_os.h": "c",
+    "gpio.h": "c",
+    "main.h": "c"
   }
 }

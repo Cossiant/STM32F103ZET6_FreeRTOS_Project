@@ -24,6 +24,8 @@
 
 #include "remote.h"
 
+extern osSemaphoreId_t LCD_refresh_gsemHandle;
+
 TIM_HandleTypeDef g_tim4_handle; /* 定时器4句柄 */
 
 /**
@@ -213,4 +215,88 @@ uint8_t remote_scan(void)
     }
 
     return sta;
+}
+// 读取并处理红外遥控器收到的信号
+void Read_remote_data(REMOTE_USE_DATA *data)
+{
+    data->key = remote_scan();
+    if (data->key) {
+        // lcd_show_num(86, 230, key, 3, 16, BLUE);          /* 显示键值 */
+        // lcd_show_num(86, 250, g_remote_cnt, 3, 16, BLUE); /* 显示按键次数 */
+        data->g_remote_cnt = g_remote_cnt;
+        switch (data->key) {
+            case 0:
+                data->str = "ERROR";
+                break;
+            case 69:
+                data->str = "POWER";
+                break;
+            case 70:
+                data->str = "UP";
+                break;
+            case 64:
+                data->str = "PLAY";
+                break;
+            case 71:
+                data->str = "ALIENTEK";
+                break;
+            case 67:
+                data->str = "RIGHT";
+                break;
+            case 68:
+                data->str = "LEFT";
+                break;
+            case 7:
+                data->str = "VOL-";
+                break;
+            case 21:
+                data->str = "DOWN";
+                break;
+            case 9:
+                data->str = "VOL+";
+                break;
+            case 22:
+                data->str = "1";
+                break;
+            case 25:
+                data->str = "2";
+                break;
+            case 13:
+                data->str = "3";
+                break;
+            case 12:
+                data->str = "4";
+                break;
+            case 24:
+                data->str = "5";
+                break;
+            case 94:
+                data->str = "6";
+                break;
+            case 8:
+                data->str = "7";
+                break;
+            case 28:
+                data->str = "8";
+                break;
+            case 90:
+                data->str = "9";
+                break;
+            case 66:
+                data->str = "0";
+                break;
+            case 74:
+                data->str = "DELETE";
+                break;
+        }
+        // lcd_fill(86, 270, 116 + 8 * 8, 170 + 16, WHITE);  /* 清楚之前的显示 */
+        // lcd_show_string(86, 270, 200, 16, 16, str, BLUE); /* 显示SYMBOL */
+    } else
+        osDelay(100);
+    // 如果上一次统计的按下的时间和这一次统计的时间不一致，就刷新LCD
+    if (data->g_remote_cnt != data->old_remote_cnt) {
+        // 释放LCD刷新信号量
+        osSemaphoreRelease(LCD_refresh_gsemHandle);
+        data->old_remote_cnt = data->g_remote_cnt;
+    }
 }

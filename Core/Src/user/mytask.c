@@ -100,11 +100,11 @@ void StartLEDProcessedTaskFunction(void *argument)
             sscanf(param_str, "%u", &read_data_num);
             // 将其送给系统变量，以供调用
             SYS->Beep_control.Beep_control_num = BEEP_AUTO;
-            SYS->Beep_control.Beep_delay_num = read_data_num;
+            SYS->Beep_control.Beep_delay_num   = read_data_num;
         } else if (strncmp(SYS->usart_use_data.Response_Read_data, "BEEP_OFF", 8) == 0) {
             myprintf("Now BEEP OFF");
             SYS->Beep_control.Beep_control_num = BEEP_OFF;
-            SYS->Beep_control.Beep_delay_num = 0;
+            SYS->Beep_control.Beep_delay_num   = 0;
         }
         /* 指令缓冲区安全擦除 */
         memset(SYS->usart_use_data.Response_Read_data, 0, UART1_DMA_RX_LEN);
@@ -176,9 +176,15 @@ void StartLCDDisplayTaskFunction(void *argument)
             strcpy(SYS->usart_use_data.Read_data, SYS->usart_use_data.Last_Read_data);           // 将上次接受的数据改为当前数据
 
             lcd_show_string(10, 190, 240, 16, 16, "Beep read data is :", BLACK);
-            lcd_show_string(10, 210, 240, 16, 16, "              ", BLACK);                     // 清空当前行显示
+            lcd_show_string(10, 210, 240, 16, 16, "              ", BLACK);               // 清空当前行显示
             lcd_show_xnum(10, 210, SYS->Beep_control.Beep_delay_num, 4, 16, 0X80, BLACK); // 读取出来的Beep延时数据（单位ms）
         }
+
+        lcd_show_num(10, 230, SYS->Remote_use_data.key, 3, 16, BLUE);          /* 显示键值 */
+        lcd_show_num(10, 250, SYS->Remote_use_data.g_remote_cnt, 3, 16, BLUE); /* 显示按键次数 */
+        lcd_fill(10, 270, 116 + 8 * 8, 170 + 16, WHITE);                       /* 清楚之前的显示 */
+        lcd_show_string(10, 270, 200, 16, 16, SYS->Remote_use_data.str, BLUE); /* 显示SYMBOL */
+
         // 调试输出（建议使用条件编译控制）
         // myprintf("LCD refresh data is :%s", SYS->usart_use_data.Read_data);
     }

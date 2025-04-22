@@ -46,3 +46,9 @@ freertosstm32zet6\freertos.o: ../Core/Inc/user/my_sys_data.h
 freertosstm32zet6\freertos.o: ../Core/Inc/user/led.h
 freertosstm32zet6\freertos.o: ../Core/Inc/user/myprintf.h
 freertosstm32zet6\freertos.o: ../Core/Inc/user/beep.h
+freertosstm32zet6\freertos.o: ../Core/Inc/user/remote.h
+freertosstm32zet6\freertos.o: ../Core/Inc/dma.h
+freertosstm32zet6\freertos.o: ../Core/Inc/tim.h
+freertosstm32zet6\freertos.o: ../Core/Inc/usart.h
+freertosstm32zet6\freertos.o: ../Core/Inc/gpio.h
+freertosstm32zet6\freertos.o: ../Core/Inc/fsmc.h

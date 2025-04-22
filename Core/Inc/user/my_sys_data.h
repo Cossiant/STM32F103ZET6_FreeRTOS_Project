@@ -4,6 +4,7 @@
 #include "led.h"
 #include "myprintf.h"
 #include "beep.h"
+#include "remote.h"
 
 #define Set_Time_hours   0
 #define Set_Time_minute  0
@@ -25,6 +26,7 @@ typedef struct {
     USART_USE_DATA usart_use_data; //!< 通信数据管理系统
     LED_USE_DATA led_control_num;
     BEEP_USE_DATA Beep_control;
+    REMOTE_USE_DATA Remote_use_data;
 } SYS_USE_DATA;
 
 #endif
