@@ -5,6 +5,7 @@
 "freertosstm32zet6\freertos.o"
 "freertosstm32zet6\dma.o"
 "freertosstm32zet6\fsmc.o"
+"freertosstm32zet6\tim.o"
 "freertosstm32zet6\usart.o"
 "freertosstm32zet6\stm32f1xx_it.o"
 "freertosstm32zet6\stm32f1xx_hal_msp.o"
@@ -45,6 +46,7 @@
 "freertosstm32zet6\myprintf.o"
 "freertosstm32zet6\led.o"
 "freertosstm32zet6\beep.o"
+"freertosstm32zet6\remote.o"
 --strict --scatter "FreeRTOSSTM32ZET6\FreeRTOSSTM32ZET6.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

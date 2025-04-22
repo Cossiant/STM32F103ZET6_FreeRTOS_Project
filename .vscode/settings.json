@@ -5,6 +5,7 @@
     "my_sys_data.h": "c",
     "beep.h": "c",
     "myprintf.h": "c",
-    "freertos.h": "c"
+    "freertos.h": "c",
+    "remote.h": "c"
   }
 }

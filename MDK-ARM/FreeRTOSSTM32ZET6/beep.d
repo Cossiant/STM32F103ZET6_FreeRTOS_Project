@@ -42,6 +42,13 @@ freertosstm32zet6\beep.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart
 freertosstm32zet6\beep.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h
 freertosstm32zet6\beep.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 freertosstm32zet6\beep.o: ../Core/Inc/gpio.h
+freertosstm32zet6\beep.o: ../Core/Inc/user/remote.h
+freertosstm32zet6\beep.o: ../Core/Inc/dma.h
+freertosstm32zet6\beep.o: ../Core/Inc/tim.h
+freertosstm32zet6\beep.o: ../Core/Inc/usart.h
+freertosstm32zet6\beep.o: ../Core/Inc/fsmc.h
+freertosstm32zet6\beep.o: ../Core/Inc/user/lcd.h
+freertosstm32zet6\beep.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 freertosstm32zet6\beep.o: ../Core/Inc/user/my_sys_data.h
 freertosstm32zet6\beep.o: ../Core/Inc/user/led.h
 freertosstm32zet6\beep.o: ../Core/Inc/user/myprintf.h
