@@ -18,3 +18,6 @@ typedef enum
 void StartBeepWorkTaskFunction(void *argument);
 
 #endif
+
+// 1、完成小车底盘设计、安装
+// 2、完成3D打印机械臂设计、制造、安装
