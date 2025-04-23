@@ -3,7 +3,7 @@
 <title>Static Call Graph - [FreeRTOSSTM32ZET6\FreeRTOSSTM32ZET6.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image FreeRTOSSTM32ZET6\FreeRTOSSTM32ZET6.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050106: Last Updated: Tue Apr 22 16:23:48 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050106: Last Updated: Wed Apr 23 12:57:41 2025
 <BR><P>
 <H3>Maximum Stack Usage =        416 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1606,7 +1606,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[107]"></a>MX_FREERTOS_Init</STRONG> (Thumb, 148 bytes, Stack size 240 bytes, freertos.o(i.MX_FREERTOS_Init))
+<P><STRONG><a name="[107]"></a>MX_FREERTOS_Init</STRONG> (Thumb, 162 bytes, Stack size 240 bytes, freertos.o(i.MX_FREERTOS_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 416 + Unknown Stack Size
 <LI>Call Chain = MX_FREERTOS_Init &rArr; osThreadNew &rArr; xTaskCreate &rArr; pvPortMalloc &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
@@ -1689,7 +1689,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[56]"></a>StartLCDDisplayTaskFunction</STRONG> (Thumb, 478 bytes, Stack size 40 bytes, mytask.o(i.StartLCDDisplayTaskFunction))
+<P><STRONG><a name="[56]"></a>StartLCDDisplayTaskFunction</STRONG> (Thumb, 476 bytes, Stack size 40 bytes, mytask.o(i.StartLCDDisplayTaskFunction))
 <BR><BR>[Stack]<UL><LI>Max Depth = 248 + Unknown Stack Size
 <LI>Call Chain = StartLCDDisplayTaskFunction &rArr; lcd_init &rArr; HAL_SRAM_Init &rArr; HAL_SRAM_MspInit &rArr; HAL_FSMC_MspInit &rArr; HAL_GPIO_Init
 </UL>
@@ -1707,12 +1707,13 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[57]"></a>StartLEDProcessedTaskFunction</STRONG> (Thumb, 176 bytes, Stack size 72 bytes, mytask.o(i.StartLEDProcessedTaskFunction))
+<P><STRONG><a name="[57]"></a>StartLEDProcessedTaskFunction</STRONG> (Thumb, 190 bytes, Stack size 72 bytes, mytask.o(i.StartLEDProcessedTaskFunction))
 <BR><BR>[Stack]<UL><LI>Max Depth = 296 + Unknown Stack Size
 <LI>Call Chain = StartLEDProcessedTaskFunction &rArr; __0sscanf &rArr; __vfscanf_char &rArr; __vfscanf &rArr; _scanf_int
 </UL>
 <BR>[Calls]<UL><LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
 <LI><a href="#[11f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
+<LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreAcquire
 <LI><a href="#[11b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
 <LI><a href="#[121]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr
 <LI><a href="#[120]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strncmp
@@ -1738,7 +1739,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[55]"></a>StartUART1_recv_TaskFunction</STRONG> (Thumb, 136 bytes, Stack size 80 bytes, myprintf.o(i.StartUART1_recv_TaskFunction))
+<P><STRONG><a name="[55]"></a>StartUART1_recv_TaskFunction</STRONG> (Thumb, 144 bytes, Stack size 80 bytes, myprintf.o(i.StartUART1_recv_TaskFunction))
 <BR><BR>[Stack]<UL><LI>Max Depth = 208<LI>Call Chain = StartUART1_recv_TaskFunction &rArr; osSemaphoreRelease &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_DMA
@@ -2178,6 +2179,7 @@ Global Symbols
 <LI><a href="#[149]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceiveFromISR
 </UL>
 <BR>[Called By]<UL><LI><a href="#[55]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartUART1_recv_TaskFunction
+<LI><a href="#[57]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLEDProcessedTaskFunction
 <LI><a href="#[56]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLCDDisplayTaskFunction
 <LI><a href="#[11f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;myprintf
 </UL>

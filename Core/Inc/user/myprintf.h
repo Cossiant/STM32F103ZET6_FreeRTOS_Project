@@ -10,9 +10,9 @@
  *         [接收] → Read_data → [处理] → Last_Read_data/LED_Read_data
  */
 typedef struct {
-  char Read_data[UART1_DMA_RX_LEN];      //!< 当前接收缓冲区（自动清零）
-  char Last_Read_data[UART1_DMA_RX_LEN]; //!< 历史数据缓存（用于对比变更）
-  char Response_Read_data[UART1_DMA_RX_LEN];
+    char Read_data[UART1_DMA_RX_LEN];          //!< 当前接收缓冲区（只有当新数据来的时候才会自动清零）
+    char Last_Read_data[UART1_DMA_RX_LEN];     //!< 历史数据缓存（用于对比变更，这里的数据可以理解为长久数据，知道下一次新数据覆盖）
+    char Response_Read_data[UART1_DMA_RX_LEN]; //!< 送给处理函数使用的变量（每次处理函数使用完成将会自动清空！）
 } USART_USE_DATA;
 
 void myprintf(char *format, ...);

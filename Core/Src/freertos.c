@@ -111,6 +111,11 @@ osSemaphoreId_t LCD_refresh_gsemHandle;
 const osSemaphoreAttr_t LCD_refresh_gsem_attributes = {
   .name = "LCD_refresh_gsem"
 };
+/* Definitions for uart1_data_handle_gsem */
+osSemaphoreId_t uart1_data_handle_gsemHandle;
+const osSemaphoreAttr_t uart1_data_handle_gsem_attributes = {
+  .name = "uart1_data_handle_gsem"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -151,6 +156,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of LCD_refresh_gsem */
   LCD_refresh_gsemHandle = osSemaphoreNew(1, 1, &LCD_refresh_gsem_attributes);
+
+  /* creation of uart1_data_handle_gsem */
+  uart1_data_handle_gsemHandle = osSemaphoreNew(1, 1, &uart1_data_handle_gsem_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
     /* add semaphores, ... */

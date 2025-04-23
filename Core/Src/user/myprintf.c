@@ -17,6 +17,8 @@ extern DMA_HandleTypeDef hdma_usart1_rx;
 extern osSemaphoreId_t uart1_printf_gsemHandle;
 extern osSemaphoreId_t uart1_rxok_gsemHandle;
 extern osSemaphoreId_t LCD_refresh_gsemHandle;
+// 完成数据读取，通知数据处理函数可以工作了
+extern osSemaphoreId_t uart1_data_handle_gsemHandle;
 
 // 要发送的数据
 char gbuf_printf[UART1_DMA_RX_LEN];
@@ -102,7 +104,7 @@ void uart1_data_in()
  */
 void StartUART1_recv_TaskFunction(void *argument)
 {
-    SYS_USE_DATA * SYS = (SYS_USE_DATA*)argument;
+    SYS_USE_DATA *SYS = (SYS_USE_DATA *)argument;
     // now_dma_ip当前数据缓冲区数据长度
     // rd_dma_ip读到的数据的长度
     unsigned short now_dam_ip, rd_dma_ip = 0, Read_data_len;
@@ -130,9 +132,11 @@ void StartUART1_recv_TaskFunction(void *argument)
             SYS->usart_use_data.Read_data[Read_data_len++] = rxBuffer[rd_dma_ip++];
             if (rd_dma_ip >= UART1_DMA_RX_LEN) rd_dma_ip = 0;
         }
-        // 保存上次读取到的数据
+        // 保存读取到的数据，因为Read_data会清零！虽然在这个位置他是完整的数据
         strcpy(SYS->usart_use_data.Response_Read_data, SYS->usart_use_data.Read_data);
-        // 释放LCD刷新信号量
+        // 释放data处理刷新信号量(Response_Read_data使用完成之后自动清空)
+        osSemaphoreRelease(uart1_data_handle_gsemHandle);
+        // 释放LCD刷新信号量(在LCD显示的同时将Read_data送给Last_Read_data)
         osSemaphoreRelease(LCD_refresh_gsemHandle);
     }
 }
