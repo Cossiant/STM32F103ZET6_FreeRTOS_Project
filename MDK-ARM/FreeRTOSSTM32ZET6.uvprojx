@@ -1057,6 +1057,11 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\user\remote.c</FilePath>
             </File>
+            <File>
+              <FileName>robot.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\user\robot.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

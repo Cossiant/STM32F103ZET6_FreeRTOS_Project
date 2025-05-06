@@ -47,6 +47,7 @@
 "freertosstm32zet6\led.o"
 "freertosstm32zet6\beep.o"
 "freertosstm32zet6\remote.o"
+"freertosstm32zet6\robot.o"
 --strict --scatter "FreeRTOSSTM32ZET6\FreeRTOSSTM32ZET6.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

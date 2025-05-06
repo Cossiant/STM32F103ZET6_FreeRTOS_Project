@@ -51,3 +51,4 @@ freertosstm32zet6\led.o: ../Core/Inc/dma.h
 freertosstm32zet6\led.o: ../Core/Inc/tim.h
 freertosstm32zet6\led.o: ../Core/Inc/usart.h
 freertosstm32zet6\led.o: ../Core/Inc/fsmc.h
+freertosstm32zet6\led.o: ../Core/Inc/user/robot.h

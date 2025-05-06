@@ -144,15 +144,17 @@ void MX_TIM8_Init(void)
   }
   /* USER CODE BEGIN TIM8_Init 2 */
 
-	//setting PWM num
+	//设置对应PWM参数
 	
-	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 80);
+	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 50);
 	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_2, 50);
-	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_3, 20);
+	__HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_3, 50);
 
-  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_2);
-  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_3);
+  // 这里开启PWM并打开中断
+
+  // HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_1);
+	// HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_2);
+  // HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_3);
 	
   /* USER CODE END TIM8_Init 2 */
   HAL_TIM_MspPostInit(&htim8);
@@ -199,6 +201,10 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE END TIM8_MspInit 0 */
     /* TIM8 clock enable */
     __HAL_RCC_TIM8_CLK_ENABLE();
+
+    /* TIM8 interrupt Init */
+    HAL_NVIC_SetPriority(TIM8_CC_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(TIM8_CC_IRQn);
   /* USER CODE BEGIN TIM8_MspInit 1 */
 
   /* USER CODE END TIM8_MspInit 1 */
@@ -266,6 +272,9 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE END TIM8_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_TIM8_CLK_DISABLE();
+
+    /* TIM8 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(TIM8_CC_IRQn);
   /* USER CODE BEGIN TIM8_MspDeInit 1 */
 
   /* USER CODE END TIM8_MspDeInit 1 */

@@ -52,3 +52,4 @@ freertosstm32zet6\freertos.o: ../Core/Inc/tim.h
 freertosstm32zet6\freertos.o: ../Core/Inc/usart.h
 freertosstm32zet6\freertos.o: ../Core/Inc/gpio.h
 freertosstm32zet6\freertos.o: ../Core/Inc/fsmc.h
+freertosstm32zet6\freertos.o: ../Core/Inc/user/robot.h

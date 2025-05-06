@@ -52,3 +52,4 @@ freertosstm32zet6\main.o: ../Core/Inc/user/led.h
 freertosstm32zet6\main.o: ../Core/Inc/user/myprintf.h
 freertosstm32zet6\main.o: ../Core/Inc/user/beep.h
 freertosstm32zet6\main.o: ../Core/Inc/user/remote.h
+freertosstm32zet6\main.o: ../Core/Inc/user/robot.h

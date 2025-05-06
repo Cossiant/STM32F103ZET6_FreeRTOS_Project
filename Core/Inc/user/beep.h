@@ -7,6 +7,7 @@ typedef struct
   unsigned char Beep_control_num;
 }BEEP_USE_DATA;
 
+
 typedef enum
 {
   BEEP_OFF,

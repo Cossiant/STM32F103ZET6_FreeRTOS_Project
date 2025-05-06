@@ -59,3 +59,4 @@ freertosstm32zet6\mytask.o: ../Core/Inc/user/beep.h
 freertosstm32zet6\mytask.o: ../Core/Inc/user/remote.h
 freertosstm32zet6\mytask.o: ../Core/Inc/tim.h
 freertosstm32zet6\mytask.o: ../Core/Inc/fsmc.h
+freertosstm32zet6\mytask.o: ../Core/Inc/user/robot.h

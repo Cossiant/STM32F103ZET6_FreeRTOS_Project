@@ -55,3 +55,4 @@ freertosstm32zet6\myprintf.o: ../Core/Inc/dma.h
 freertosstm32zet6\myprintf.o: ../Core/Inc/tim.h
 freertosstm32zet6\myprintf.o: ../Core/Inc/usart.h
 freertosstm32zet6\myprintf.o: ../Core/Inc/fsmc.h
+freertosstm32zet6\myprintf.o: ../Core/Inc/user/robot.h
