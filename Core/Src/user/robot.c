@@ -1,5 +1,6 @@
 #include "my_sys_data.h"
 #include "FreeRTOS.h"
+#include "string.h"
 
 // 定义PWM要输出的数周期数量
 // ROBOT.c私有变量
@@ -34,15 +35,34 @@ void Write_PWM_Num_to_local(unsigned char which_one, unsigned int inputnum)
 /******************************************************************************************************************************************/
 // 写入参数并启动机械臂PWM，目前还没有添加方向和位控制
 // 公共函数
-void Start_Robot_PWM_Function(SYS_USE_DATA *SYS)
+void Start_Robot_PWM_Function(SYS_USE_DATA *SYS, unsigned char channel_num)
 {
     // 这里需要将控制参数传递给这边自定义变量，否则无法直接调用SYS当中的参数
     Write_PWM_Num_to_local(1, SYS->Robot_use_data.Motor1.PWM_execution_count);
     Write_PWM_Num_to_local(2, SYS->Robot_use_data.Motor2.PWM_execution_count);
     Write_PWM_Num_to_local(3, SYS->Robot_use_data.Motor3.PWM_execution_count);
-    Robot_Motor1_Ready = Robot_Motor_Busy;
-    // 启动通道1，随后会自动完成通道2和通道3的启动
-    HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_1);
+    switch (channel_num) {
+        case 1:
+            /* code */
+            Robot_Motor1_Ready = Robot_Motor_Busy;
+            // 启动通道1，随后会自动完成通道2和通道3的启动
+            HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_1);
+            break;
+        case 2:
+            /* code */
+            Robot_Motor2_Ready = Robot_Motor_Busy;
+            // 启动通道2，随后会自动完成通道3的启动
+            HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_2);
+            break;
+        case 3:
+            /* code */
+            Robot_Motor3_Ready = Robot_Motor_Busy;
+            // 启动通道3
+            HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_3);
+            break;
+        default:
+            break;
+    }
 }
 /******************************************************************************************************************************************/
 // 中断处理函数必须是先进行判断再进行自减，否则执行次数将会少1
@@ -91,10 +111,29 @@ void StartRobotmainControlTask(void *argument)
     SYS->Robot_use_data.Motor3.PWM_execution_count = 20;
     // 你需要去考虑怎么才可以结合遥控器完成操作！
     //__HAL_TIM_SET_COMPARE
+    osDelay(500);
+    // 从通道1启动
+    Start_Robot_PWM_Function(SYS, 1);
     for (;;) {
-        osDelay(2000);
-        // 启动PWM
-        Start_Robot_PWM_Function(SYS);
+        if (strcmp(SYS->Remote_use_data.str, "ALIENTEK") == 0) {
+            // 启动PWM
+            if (SYS->Remote_use_data.key == 69) {
+                // 输出PWM，因为osdelay为2，因此每个周期应该也为2
+                SYS->Robot_use_data.Motor1.PWM_execution_count = 2;
+                SYS->Robot_use_data.Motor2.PWM_execution_count = 0;
+                SYS->Robot_use_data.Motor3.PWM_execution_count = 0;
+                // 这个红外遥控按钮遥控的是1号电机，因此操作一号电机启动
+                Start_Robot_PWM_Function(SYS, 1);
+            }
+            // 自动清空？有没有这个必要？
+            if (SYS->Remote_use_data.key == 0) {
+                SYS->Robot_use_data.Motor1.PWM_execution_count = 0;
+                SYS->Robot_use_data.Motor2.PWM_execution_count = 0;
+                SYS->Robot_use_data.Motor3.PWM_execution_count = 0;
+            }
+            osDelay(2);
+            continue;
+        }
+        osDelay(10);
     }
 }
-

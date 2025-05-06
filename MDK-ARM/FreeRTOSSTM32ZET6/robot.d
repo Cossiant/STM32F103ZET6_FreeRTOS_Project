@@ -52,3 +52,4 @@ freertosstm32zet6\robot.o: ../Core/Inc/usart.h
 freertosstm32zet6\robot.o: ../Core/Inc/gpio.h
 freertosstm32zet6\robot.o: ../Core/Inc/fsmc.h
 freertosstm32zet6\robot.o: ../Core/Inc/user/robot.h
+freertosstm32zet6\robot.o: D:\Apps\Works\Keil_v5\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

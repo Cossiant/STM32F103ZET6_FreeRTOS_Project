@@ -3,7 +3,7 @@
 <title>Static Call Graph - [FreeRTOSSTM32ZET6\FreeRTOSSTM32ZET6.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image FreeRTOSSTM32ZET6\FreeRTOSSTM32ZET6.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050106: Last Updated: Tue May 06 15:50:53 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050106: Last Updated: Tue May 06 16:46:05 2025
 <BR><P>
 <H3>Maximum Stack Usage =        440 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -789,7 +789,8 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[12d]"></a>strcmp</STRONG> (Thumb, 128 bytes, Stack size 0 bytes, strcmpv7m.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[57]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLEDProcessedTaskFunction
+<BR><BR>[Called By]<UL><LI><a href="#[5b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartRobotmainControlTask
+<LI><a href="#[57]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLEDProcessedTaskFunction
 <LI><a href="#[56]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;StartLCDDisplayTaskFunction
 <LI><a href="#[52]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_get_lc_ctype
 <LI><a href="#[8d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_get_lc_numeric
@@ -1767,7 +1768,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f103xe.o(RESET)
 </UL>
-<P><STRONG><a name="[123]"></a>Read_remote_data</STRONG> (Thumb, 230 bytes, Stack size 8 bytes, remote.o(i.Read_remote_data))
+<P><STRONG><a name="[123]"></a>Read_remote_data</STRONG> (Thumb, 226 bytes, Stack size 8 bytes, remote.o(i.Read_remote_data))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = Read_remote_data &rArr; osSemaphoreRelease &rArr; xQueueGenericSend &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[125]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
@@ -1829,10 +1830,11 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[5b]"></a>StartRobotmainControlTask</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, robot.o(i.StartRobotmainControlTask))
+<P><STRONG><a name="[5b]"></a>StartRobotmainControlTask</STRONG> (Thumb, 90 bytes, Stack size 0 bytes, robot.o(i.StartRobotmainControlTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = StartRobotmainControlTask &rArr; osDelay &rArr; vTaskDelay &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
 <BR>[Calls]<UL><LI><a href="#[125]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osDelay
+<LI><a href="#[12d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcmp
 <LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Start_Robot_PWM_Function
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
@@ -1857,7 +1859,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(i.MX_FREERTOS_Init)
 </UL>
-<P><STRONG><a name="[135]"></a>Start_Robot_PWM_Function</STRONG> (Thumb, 46 bytes, Stack size 8 bytes, robot.o(i.Start_Robot_PWM_Function))
+<P><STRONG><a name="[135]"></a>Start_Robot_PWM_Function</STRONG> (Thumb, 74 bytes, Stack size 8 bytes, robot.o(i.Start_Robot_PWM_Function))
 <BR><BR>[Stack]<UL><LI>Max Depth = 28<LI>Call Chain = Start_Robot_PWM_Function &rArr; HAL_TIM_PWM_Start_IT &rArr; TIM_CCxChannelCmd
 </UL>
 <BR>[Calls]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Start_IT
