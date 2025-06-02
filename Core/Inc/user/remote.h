@@ -64,9 +64,9 @@
 
 typedef struct
 {
-    char *str;                  /*按键的str*/
-    unsigned char key;          /*按键按下的key值 */
-    unsigned char g_remote_cnt; /* 按键按下的次数 */
+    char *str;                    /*当前按键的str*/
+    unsigned char key;            /*按键按下的key值 */
+    unsigned char g_remote_cnt;   /* 按键按下的次数 */
     unsigned char old_remote_cnt; /* 统计的上一次的按键按下的次数 */
 } REMOTE_USE_DATA;
 

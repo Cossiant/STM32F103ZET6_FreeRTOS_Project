@@ -12,6 +12,9 @@ unsigned int Robot_Motor3_PWM_execution_num = 0;
 unsigned char Robot_Motor1_Ready = Robot_Motor_Ready;
 unsigned char Robot_Motor2_Ready = Robot_Motor_Ready;
 unsigned char Robot_Motor3_Ready = Robot_Motor_Ready;
+// 定义当前是否是自动模式
+// ROBOT.c私有变量
+unsigned char Robot_Mod_TIM_PWM = Robot_Mod_NULL;
 /******************************************************************************************************************************************/
 // 变量传递函数，将要执行的PWM传递给这个C文件的私有变量
 // ROBOT.c私有函数
@@ -41,11 +44,13 @@ void Start_Robot_PWM_Function(SYS_USE_DATA *SYS, unsigned char channel_num)
     Write_PWM_Num_to_local(1, SYS->Robot_use_data.Motor1.PWM_execution_count);
     Write_PWM_Num_to_local(2, SYS->Robot_use_data.Motor2.PWM_execution_count);
     Write_PWM_Num_to_local(3, SYS->Robot_use_data.Motor3.PWM_execution_count);
+    // 将当前电机的状态给到TIM用于判断是否自动开启通道转换
+    Robot_Mod_TIM_PWM = SYS->Robot_use_data.Motor_Mod;
     switch (channel_num) {
         case 1:
             /* code */
             Robot_Motor1_Ready = Robot_Motor_Busy;
-            // 启动通道1，随后会自动完成通道2和通道3的启动
+            // 启动通道1，随后根据当前的mod模式决定是否开启通道自动转换
             HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_1);
             break;
         case 2:
@@ -70,70 +75,198 @@ void Start_Robot_PWM_Function(SYS_USE_DATA *SYS, unsigned char channel_num)
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
 {
     // 确保计数不会超过限定，导致数据溢出
-    // 这个地方有问题！因为3个通道每个都可以进这个中断，导致应该输出20个波形但是其只输出7个！
     // 所以我在这里引入了标志位，这个定时器同一时刻只能控制1个通道，当通道标志位为忙的时候才可以进行计数
     if ((Robot_Motor1_PWM_execution_num > 0) && (Robot_Motor1_Ready == Robot_Motor_Busy)) Robot_Motor1_PWM_execution_num = Robot_Motor1_PWM_execution_num - 1;
     if ((Robot_Motor2_PWM_execution_num > 0) && (Robot_Motor2_Ready == Robot_Motor_Busy)) Robot_Motor2_PWM_execution_num = Robot_Motor2_PWM_execution_num - 1;
     if ((Robot_Motor3_PWM_execution_num > 0) && (Robot_Motor3_Ready == Robot_Motor_Busy)) Robot_Motor3_PWM_execution_num = Robot_Motor3_PWM_execution_num - 1;
     // 从这里开始是根据计数做对应PWM操作
     // 判断是否完成指定数量PWM波，并且确定当前状态是忙，这样就可以只执行一次而不会下次中断再进入这个判断
-    if ((Robot_Motor1_PWM_execution_num == 0) && (Robot_Motor1_Ready == Robot_Motor_Busy)) {
-        Robot_Motor1_Ready = Robot_Motor_Ready;
-        Robot_Motor2_Ready = Robot_Motor_Busy;
-        HAL_TIM_PWM_Stop_IT(&htim8, TIM_CHANNEL_1);
-        HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_2);
-        // 这里添加return;的原因是这次启动通道2之后不需要再让执行次数-1了
-    }
-    // 同理，但是判断的是2通道
-    if ((Robot_Motor2_PWM_execution_num == 0) && (Robot_Motor2_Ready == Robot_Motor_Busy)) {
-        Robot_Motor2_Ready = Robot_Motor_Ready;
-        Robot_Motor3_Ready = Robot_Motor_Busy;
-        HAL_TIM_PWM_Stop_IT(&htim8, TIM_CHANNEL_2);
-        HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_3);
-    }
-    // 同理，但是判断的是3通道
-    if ((Robot_Motor3_PWM_execution_num == 0) && (Robot_Motor3_Ready == Robot_Motor_Busy)) {
-        Robot_Motor3_Ready = Robot_Motor_Ready;
-        HAL_TIM_PWM_Stop_IT(&htim8, TIM_CHANNEL_3);
+    // 因此在这里需要分情况，如果是手动模式那么不需要进行PWM波通道自动切换，但是如果是自动模式就需要让其能够实现自动切换
+    if (Robot_Mod_TIM_PWM == Robot_Mod_AUTO) {
+        if ((Robot_Motor1_PWM_execution_num == 0) && (Robot_Motor1_Ready == Robot_Motor_Busy)) {
+            Robot_Motor1_Ready = Robot_Motor_Ready;
+            Robot_Motor2_Ready = Robot_Motor_Busy;
+            HAL_TIM_PWM_Stop_IT(&htim8, TIM_CHANNEL_1);
+            HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_2);
+        }
+        // 同理，但是判断的是2通道
+        if ((Robot_Motor2_PWM_execution_num == 0) && (Robot_Motor2_Ready == Robot_Motor_Busy)) {
+            Robot_Motor2_Ready = Robot_Motor_Ready;
+            Robot_Motor3_Ready = Robot_Motor_Busy;
+            HAL_TIM_PWM_Stop_IT(&htim8, TIM_CHANNEL_2);
+            HAL_TIM_PWM_Start_IT(&htim8, TIM_CHANNEL_3);
+        }
+        // 同理，但是判断的是3通道
+        if ((Robot_Motor3_PWM_execution_num == 0) && (Robot_Motor3_Ready == Robot_Motor_Busy)) {
+            Robot_Motor3_Ready = Robot_Motor_Ready;
+            HAL_TIM_PWM_Stop_IT(&htim8, TIM_CHANNEL_3);
+        }
+    } else {
+        // 如果不是自动模式就需要单独来控制
+        if ((Robot_Motor1_PWM_execution_num == 0) && (Robot_Motor1_Ready == Robot_Motor_Busy)) {
+            Robot_Motor1_Ready = Robot_Motor_Ready;
+            HAL_TIM_PWM_Stop_IT(&htim8, TIM_CHANNEL_1);
+        }
+        if ((Robot_Motor2_PWM_execution_num == 0) && (Robot_Motor2_Ready == Robot_Motor_Busy)) {
+            Robot_Motor2_Ready = Robot_Motor_Ready;
+            HAL_TIM_PWM_Stop_IT(&htim8, TIM_CHANNEL_2);
+        }
+        if ((Robot_Motor3_PWM_execution_num == 0) && (Robot_Motor3_Ready == Robot_Motor_Busy)) {
+            Robot_Motor3_Ready = Robot_Motor_Ready;
+            HAL_TIM_PWM_Stop_IT(&htim8, TIM_CHANNEL_3);
+        }
     }
 }
+/**********************************************************************************************************************************************/
+// 为了实现低内聚高耦合，因此在这里设定按键检测判断函数
+// Key_num是红外读取的key值
+// Motor_num是当前正在处理的电机值
+void Infrared_directional_button_detection(SYS_USE_DATA *SYS, unsigned char Motor_num)
+{
+    switch (Motor_num) {
+        case 1:
+            // 判断left
+            if (SYS->Remote_use_data.key == 68) {
+                // 首先完成当前电机旋转方向值给予
+                // 也可以直接操作IO口（没写代码，需要写上）
+                /**************************************/
+                /**************************************/
+                SYS->Robot_use_data.Motor1.Motor_rotation_direction = Robot_rotation_left;
+                // 输出PWM，因为osdelay为2，因此每个周期应该也为2
+                SYS->Robot_use_data.Motor1.PWM_execution_count = 2;
+                // 这个红外遥控按钮遥控的是1号电机，因此操作一号电机启动
+                Start_Robot_PWM_Function(SYS, 1);
+            }
+            // 判断right
+            if (SYS->Remote_use_data.key == 67) {
+                // 首先完成当前电机旋转方向值给予
+                // 也可以直接操作IO口（没写代码，需要写上）
+                /**************************************/
+                /**************************************/
+                SYS->Robot_use_data.Motor1.Motor_rotation_direction = Robot_rotation_right;
+                // 输出PWM，因为osdelay为2，因此每个周期应该也为2
+                SYS->Robot_use_data.Motor1.PWM_execution_count = 2;
+                // 这个红外遥控按钮遥控的是1号电机，因此操作一号电机启动
+                Start_Robot_PWM_Function(SYS, 1);
+            }
+            // 自动清空PWM波参数
+            if (SYS->Remote_use_data.key == 0) {
+                // 将PWM执行的参数清零
+                SYS->Robot_use_data.Motor1.PWM_execution_count = 0;
+                // 在这里清除IO口到默认设置（没写代码，需要写上，默认高电平）
+                /**************************************/
+                /**************************************/
+            }
+            break;
+        case 2:
+            // 判断up
+            if (SYS->Remote_use_data.key == 70) {
+                SYS->Robot_use_data.Motor2.Motor_rotation_direction = Robot_rotation_left;
+                SYS->Robot_use_data.Motor2.PWM_execution_count      = 2;
+                Start_Robot_PWM_Function(SYS, 2);
+            }
+            // 判断down
+            if (SYS->Remote_use_data.key == 21) {
+                SYS->Robot_use_data.Motor2.Motor_rotation_direction = Robot_rotation_right;
+                SYS->Robot_use_data.Motor2.PWM_execution_count      = 2;
+                Start_Robot_PWM_Function(SYS, 2);
+            }
+            if (SYS->Remote_use_data.key == 0) {
+                SYS->Robot_use_data.Motor2.PWM_execution_count = 0;
+            }
+            break;
+        case 3:
+            // 判断up
+            if (SYS->Remote_use_data.key == 70) {
+                SYS->Robot_use_data.Motor3.Motor_rotation_direction = Robot_rotation_left;
+                SYS->Robot_use_data.Motor3.PWM_execution_count      = 2;
+                Start_Robot_PWM_Function(SYS, 3);
+            }
+            // 判断down
+            if (SYS->Remote_use_data.key == 21) {
+                SYS->Robot_use_data.Motor3.Motor_rotation_direction = Robot_rotation_right;
+                SYS->Robot_use_data.Motor3.PWM_execution_count      = 2;
+                Start_Robot_PWM_Function(SYS, 3);
+            }
+            if (SYS->Remote_use_data.key == 0) {
+                SYS->Robot_use_data.Motor3.PWM_execution_count = 0;
+            }
+            break;
+        default:
+            break;
+    }
+}
+/***********************************************************************************************************************************************/
+/*
+ * 我需要在这里完成通过读取红外参数来控制机械臂移动的函数
+ */
+void remote_control_robot(SYS_USE_DATA *SYS)
+{
+    // 首先需要完成的是读取红外当前时刻的数据
+    // 我在这里设定的是当红外按钮上一个按键是POWER时启动空模式
+    // 当红外按钮为ALIENTEK时设定为手动模式
+    // 自动模式可以后期加上
+    // 注意这里可千万别用switch，因为switch没有办法判断字符串！
+    if (strcmp(SYS->Remote_use_data.str, "POWER") == 0) {
+        // 启动空模式
+        SYS->Robot_use_data.Motor_Mod = Robot_Mod_NULL;
+    }
+    if (strcmp(SYS->Remote_use_data.str, "PLAY") == 0) {
+        // 启动小车移动控制模式（这个需要4通道控制）
+        SYS->Robot_use_data.Motor_Mod = Robot_Mod_Move;
+    }
+    if (strcmp(SYS->Remote_use_data.str, "1") == 0) {
+        // 启动电机1单独控制模式
+        SYS->Robot_use_data.Motor_Mod = Robot_Mod_Motor1;
+    }
+    if (strcmp(SYS->Remote_use_data.str, "2") == 0) {
+        // 启动电机2单独控制模式
+        SYS->Robot_use_data.Motor_Mod = Robot_Mod_Motor2;
+    }
+    if (strcmp(SYS->Remote_use_data.str, "3") == 0) {
+        // 启动电机3单独控制模式
+        SYS->Robot_use_data.Motor_Mod = Robot_Mod_Motor3;
+    }
+    // 这里暂时没有添加自动模式！
+
+    // 读取完成后就可以进行判断当前模式
+    // 这里目前是有问题的，因为up和down需要两个电机合作，而左右只需要控制电机1即可因此这里写的是控制电机1的代码
+    switch (SYS->Robot_use_data.Motor_Mod) {
+        // 这里是手动模式
+        // 1电机只判断左右
+        // 2电机只判断上下
+        // 3电机只判断上下
+        // 还有后续的小车移动电机这个直接单独用一种模式（四个电机用一个通道就够了，判断的任务交给IO控制）
+        case Robot_Mod_Motor1:
+            Infrared_directional_button_detection(SYS, 1);
+            break;
+        case Robot_Mod_Motor2:
+            Infrared_directional_button_detection(SYS, 2);
+            break;
+        case Robot_Mod_Motor3:
+            Infrared_directional_button_detection(SYS, 3);
+            break;
+        case Robot_Mod_NULL:
+            // 空模式这里目前什么都不执行
+            osDelay(2);
+            break;
+        // 如果是自动模式或者其他就退出函数
+        default:
+            break;
+    }
+}
+
 /******************************************************************************************************************************************/
 // 任务执行函数
 // 任务函数
 void StartRobotmainControlTask(void *argument)
 {
     SYS_USE_DATA *SYS = (SYS_USE_DATA *)argument;
-    // 这里初始化参数为20的原因是需要一个通道执行20周期PWM波
-    // 准确的说是产生20个上升沿和20个下降沿，对于步进电机来说就是20个脉冲，最小转子转动20次
-    // 过一段时间需要将对应角度做运算转换成对应PWM脉冲波，需要写计算函数！
-    SYS->Robot_use_data.Motor1.PWM_execution_count = 20;
-    SYS->Robot_use_data.Motor2.PWM_execution_count = 40;
-    SYS->Robot_use_data.Motor3.PWM_execution_count = 20;
-    // 你需要去考虑怎么才可以结合遥控器完成操作！
-    //__HAL_TIM_SET_COMPARE
     osDelay(500);
-    // 从通道1启动
-    Start_Robot_PWM_Function(SYS, 1);
+    // 首先需要将mod模式设定为NULL
+    SYS->Robot_use_data.Motor_Mod = Robot_Mod_NULL;
     for (;;) {
-        if (strcmp(SYS->Remote_use_data.str, "ALIENTEK") == 0) {
-            // 启动PWM
-            if (SYS->Remote_use_data.key == 69) {
-                // 输出PWM，因为osdelay为2，因此每个周期应该也为2
-                SYS->Robot_use_data.Motor1.PWM_execution_count = 2;
-                SYS->Robot_use_data.Motor2.PWM_execution_count = 0;
-                SYS->Robot_use_data.Motor3.PWM_execution_count = 0;
-                // 这个红外遥控按钮遥控的是1号电机，因此操作一号电机启动
-                Start_Robot_PWM_Function(SYS, 1);
-            }
-            // 自动清空？有没有这个必要？
-            if (SYS->Remote_use_data.key == 0) {
-                SYS->Robot_use_data.Motor1.PWM_execution_count = 0;
-                SYS->Robot_use_data.Motor2.PWM_execution_count = 0;
-                SYS->Robot_use_data.Motor3.PWM_execution_count = 0;
-            }
-            osDelay(2);
-            continue;
-        }
-        osDelay(10);
+        remote_control_robot(SYS);
+        osDelay(2);
     }
 }

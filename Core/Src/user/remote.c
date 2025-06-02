@@ -229,11 +229,12 @@ void Read_remote_data(REMOTE_USE_DATA *data)
                 data->str = "ERROR";
                 break;
             case 69:
-            //临时注释，以方便按钮控制
-                //data->str = "POWER";
+
+                data->str = "POWER";
                 break;
             case 70:
-                data->str = "UP";
+                // 临时注释，以方便按钮控制（这是方向键！）
+                //  data->str = "UP";
                 break;
             case 64:
                 data->str = "PLAY";
@@ -242,16 +243,19 @@ void Read_remote_data(REMOTE_USE_DATA *data)
                 data->str = "ALIENTEK";
                 break;
             case 67:
-                data->str = "RIGHT";
+                // 临时注释，以方便按钮控制（这是方向键！）
+                //  data->str = "RIGHT";
                 break;
             case 68:
-                data->str = "LEFT";
+                // 临时注释，以方便按钮控制（这是方向键！）
+                //  data->str = "LEFT";
                 break;
             case 7:
                 data->str = "VOL-";
                 break;
             case 21:
-                data->str = "DOWN";
+                // 临时注释，以方便按钮控制（这是方向键！）
+                //  data->str = "DOWN";
                 break;
             case 9:
                 data->str = "VOL+";
