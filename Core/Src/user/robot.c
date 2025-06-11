@@ -128,8 +128,9 @@ void Infrared_directional_button_detection(SYS_USE_DATA *SYS, unsigned char Moto
             // 判断left
             if (SYS->Remote_use_data.key == 68) {
                 // 首先完成当前电机旋转方向值给予
-                // 也可以直接操作IO口（没写代码，需要写上）
+                // 也可以直接操作IO口（没写代码，需要写上）(IO低电平)
                 /**************************************/
+                HAL_GPIO_WritePin(Motor_GPIO_CH1_GPIO_Port, Motor_GPIO_CH1_Pin, GPIO_PIN_RESET);
                 /**************************************/
                 SYS->Robot_use_data.Motor1.Motor_rotation_direction = Robot_rotation_left;
                 // 输出PWM，因为osdelay为2，因此每个周期应该也为2
@@ -140,8 +141,9 @@ void Infrared_directional_button_detection(SYS_USE_DATA *SYS, unsigned char Moto
             // 判断right
             if (SYS->Remote_use_data.key == 67) {
                 // 首先完成当前电机旋转方向值给予
-                // 也可以直接操作IO口（没写代码，需要写上）
+                // 也可以直接操作IO口（没写代码，需要写上）(IO高电平)
                 /**************************************/
+                HAL_GPIO_WritePin(Motor_GPIO_CH1_GPIO_Port, Motor_GPIO_CH1_Pin, GPIO_PIN_SET);
                 /**************************************/
                 SYS->Robot_use_data.Motor1.Motor_rotation_direction = Robot_rotation_right;
                 // 输出PWM，因为osdelay为2，因此每个周期应该也为2
@@ -155,42 +157,172 @@ void Infrared_directional_button_detection(SYS_USE_DATA *SYS, unsigned char Moto
                 SYS->Robot_use_data.Motor1.PWM_execution_count = 0;
                 // 在这里清除IO口到默认设置（没写代码，需要写上，默认高电平）
                 /**************************************/
+                HAL_GPIO_WritePin(Motor_GPIO_CH1_GPIO_Port, Motor_GPIO_CH1_Pin, GPIO_PIN_SET);
                 /**************************************/
             }
             break;
         case 2:
-            // 判断up
+            // 判断up（低电平往前）
             if (SYS->Remote_use_data.key == 70) {
+                HAL_GPIO_WritePin(Motor_GPIO_CH2_GPIO_Port, Motor_GPIO_CH2_Pin, GPIO_PIN_RESET);
                 SYS->Robot_use_data.Motor2.Motor_rotation_direction = Robot_rotation_left;
                 SYS->Robot_use_data.Motor2.PWM_execution_count      = 2;
                 Start_Robot_PWM_Function(SYS, 2);
             }
-            // 判断down
+            // 判断down（高电平往后）
             if (SYS->Remote_use_data.key == 21) {
+                HAL_GPIO_WritePin(Motor_GPIO_CH2_GPIO_Port, Motor_GPIO_CH2_Pin, GPIO_PIN_SET);
                 SYS->Robot_use_data.Motor2.Motor_rotation_direction = Robot_rotation_right;
                 SYS->Robot_use_data.Motor2.PWM_execution_count      = 2;
                 Start_Robot_PWM_Function(SYS, 2);
             }
             if (SYS->Remote_use_data.key == 0) {
                 SYS->Robot_use_data.Motor2.PWM_execution_count = 0;
+                HAL_GPIO_WritePin(Motor_GPIO_CH2_GPIO_Port, Motor_GPIO_CH2_Pin, GPIO_PIN_SET);
             }
             break;
         case 3:
-            // 判断up
+            // 判断up（低电平上高）
             if (SYS->Remote_use_data.key == 70) {
+                HAL_GPIO_WritePin(Motor_GPIO_CH3_GPIO_Port, Motor_GPIO_CH3_Pin, GPIO_PIN_RESET);
                 SYS->Robot_use_data.Motor3.Motor_rotation_direction = Robot_rotation_left;
                 SYS->Robot_use_data.Motor3.PWM_execution_count      = 2;
                 Start_Robot_PWM_Function(SYS, 3);
             }
-            // 判断down
+            // 判断down（高电平下低）
             if (SYS->Remote_use_data.key == 21) {
+                HAL_GPIO_WritePin(Motor_GPIO_CH3_GPIO_Port, Motor_GPIO_CH3_Pin, GPIO_PIN_SET);
                 SYS->Robot_use_data.Motor3.Motor_rotation_direction = Robot_rotation_right;
                 SYS->Robot_use_data.Motor3.PWM_execution_count      = 2;
                 Start_Robot_PWM_Function(SYS, 3);
             }
             if (SYS->Remote_use_data.key == 0) {
                 SYS->Robot_use_data.Motor3.PWM_execution_count = 0;
+                HAL_GPIO_WritePin(Motor_GPIO_CH3_GPIO_Port, Motor_GPIO_CH3_Pin, GPIO_PIN_SET);
             }
+            break;
+            // 注意！从这里开始就是对小车底盘的控制了！
+        case 4:
+            // 按下left键，小车进行左转运动
+            if (SYS->Remote_use_data.key == 68) {
+                // 对于小车左转，需要分别对电机1、电机2正转，电机3和电机4反转
+                // 并且需要将PWM信号进行正常输出，在这里表现为osDelay(2)即可，如果频率太高可以进行调整
+                // 电机1反转
+                HAL_GPIO_WritePin(Car_Motor_1IN1_GPIO_Port, Car_Motor_1IN1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_1IN2_GPIO_Port, Car_Motor_1IN2_Pin, GPIO_PIN_RESET);
+                // 电机2正转
+                HAL_GPIO_WritePin(Car_Motor_2IN1_GPIO_Port, Car_Motor_2IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_2IN2_GPIO_Port, Car_Motor_2IN2_Pin, GPIO_PIN_SET);
+                // 电机3反转
+                HAL_GPIO_WritePin(Car_Motor_3IN1_GPIO_Port, Car_Motor_3IN1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_3IN2_GPIO_Port, Car_Motor_3IN2_Pin, GPIO_PIN_RESET);
+                // 电机4正转
+                HAL_GPIO_WritePin(Car_Motor_4IN1_GPIO_Port, Car_Motor_4IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_4IN2_GPIO_Port, Car_Motor_4IN2_Pin, GPIO_PIN_SET);
+                // 对对应通道输出PWM信号
+                HAL_GPIO_WritePin(Car_Motor_1P1_GPIO_Port, Car_Motor_1P1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_2P1_GPIO_Port, Car_Motor_2P1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_3P1_GPIO_Port, Car_Motor_3P1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_4P1_GPIO_Port, Car_Motor_4P1_Pin, GPIO_PIN_RESET);
+                osDelay(10);
+                HAL_GPIO_WritePin(Car_Motor_1P1_GPIO_Port, Car_Motor_1P1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_2P1_GPIO_Port, Car_Motor_2P1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_3P1_GPIO_Port, Car_Motor_3P1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_4P1_GPIO_Port, Car_Motor_4P1_Pin, GPIO_PIN_SET);
+                osDelay(10);
+            }
+            // 按下right键，小车进行右转运动
+            if (SYS->Remote_use_data.key == 67) {
+                // 电机1反转
+                HAL_GPIO_WritePin(Car_Motor_1IN1_GPIO_Port, Car_Motor_1IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_1IN2_GPIO_Port, Car_Motor_1IN2_Pin, GPIO_PIN_SET);
+                // 电机2正转
+                HAL_GPIO_WritePin(Car_Motor_2IN1_GPIO_Port, Car_Motor_2IN1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_2IN2_GPIO_Port, Car_Motor_2IN2_Pin, GPIO_PIN_RESET);
+                // 电机3反转
+                HAL_GPIO_WritePin(Car_Motor_3IN1_GPIO_Port, Car_Motor_3IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_3IN2_GPIO_Port, Car_Motor_3IN2_Pin, GPIO_PIN_SET);
+                // 电机4正转
+                HAL_GPIO_WritePin(Car_Motor_4IN1_GPIO_Port, Car_Motor_4IN1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_4IN2_GPIO_Port, Car_Motor_4IN2_Pin, GPIO_PIN_RESET);
+                // 对对应通道输出PWM信号
+                HAL_GPIO_WritePin(Car_Motor_1P1_GPIO_Port, Car_Motor_1P1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_2P1_GPIO_Port, Car_Motor_2P1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_3P1_GPIO_Port, Car_Motor_3P1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_4P1_GPIO_Port, Car_Motor_4P1_Pin, GPIO_PIN_RESET);
+                osDelay(10);
+                HAL_GPIO_WritePin(Car_Motor_1P1_GPIO_Port, Car_Motor_1P1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_2P1_GPIO_Port, Car_Motor_2P1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_3P1_GPIO_Port, Car_Motor_3P1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_4P1_GPIO_Port, Car_Motor_4P1_Pin, GPIO_PIN_SET);
+                osDelay(10);
+            }
+            // 按下up键，小车前进
+            if (SYS->Remote_use_data.key == 70) {
+                // 电机1正转
+                HAL_GPIO_WritePin(Car_Motor_1IN1_GPIO_Port, Car_Motor_1IN1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_1IN2_GPIO_Port, Car_Motor_1IN2_Pin, GPIO_PIN_RESET);
+                // 电机2正转
+                HAL_GPIO_WritePin(Car_Motor_2IN1_GPIO_Port, Car_Motor_2IN1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_2IN2_GPIO_Port, Car_Motor_2IN2_Pin, GPIO_PIN_RESET);
+                // 电机3反转
+                HAL_GPIO_WritePin(Car_Motor_3IN1_GPIO_Port, Car_Motor_3IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_3IN2_GPIO_Port, Car_Motor_3IN2_Pin, GPIO_PIN_SET);
+                // 电机4反转
+                HAL_GPIO_WritePin(Car_Motor_4IN1_GPIO_Port, Car_Motor_4IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_4IN2_GPIO_Port, Car_Motor_4IN2_Pin, GPIO_PIN_SET);
+                // 对对应通道输出PWM信号
+                HAL_GPIO_WritePin(Car_Motor_1P1_GPIO_Port, Car_Motor_1P1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_2P1_GPIO_Port, Car_Motor_2P1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_3P1_GPIO_Port, Car_Motor_3P1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_4P1_GPIO_Port, Car_Motor_4P1_Pin, GPIO_PIN_RESET);
+                osDelay(10);
+                HAL_GPIO_WritePin(Car_Motor_1P1_GPIO_Port, Car_Motor_1P1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_2P1_GPIO_Port, Car_Motor_2P1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_3P1_GPIO_Port, Car_Motor_3P1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_4P1_GPIO_Port, Car_Motor_4P1_Pin, GPIO_PIN_SET);
+                osDelay(10);
+            }
+            // 按下down键，小车后退
+            if (SYS->Remote_use_data.key == 21) {
+
+                // 电机1正转
+                HAL_GPIO_WritePin(Car_Motor_1IN1_GPIO_Port, Car_Motor_1IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_1IN2_GPIO_Port, Car_Motor_1IN2_Pin, GPIO_PIN_SET);
+                // 电机2正转
+                HAL_GPIO_WritePin(Car_Motor_2IN1_GPIO_Port, Car_Motor_2IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_2IN2_GPIO_Port, Car_Motor_2IN2_Pin, GPIO_PIN_SET);
+                // 电机3反转
+                HAL_GPIO_WritePin(Car_Motor_3IN1_GPIO_Port, Car_Motor_3IN1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_3IN2_GPIO_Port, Car_Motor_3IN2_Pin, GPIO_PIN_RESET);
+                // 电机4反转
+                HAL_GPIO_WritePin(Car_Motor_4IN1_GPIO_Port, Car_Motor_4IN1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_4IN2_GPIO_Port, Car_Motor_4IN2_Pin, GPIO_PIN_RESET);
+                // 对对应通道输出PWM信号
+                HAL_GPIO_WritePin(Car_Motor_1P1_GPIO_Port, Car_Motor_1P1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_2P1_GPIO_Port, Car_Motor_2P1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_3P1_GPIO_Port, Car_Motor_3P1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_4P1_GPIO_Port, Car_Motor_4P1_Pin, GPIO_PIN_RESET);
+                osDelay(10);
+                HAL_GPIO_WritePin(Car_Motor_1P1_GPIO_Port, Car_Motor_1P1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_2P1_GPIO_Port, Car_Motor_2P1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_3P1_GPIO_Port, Car_Motor_3P1_Pin, GPIO_PIN_SET);
+                HAL_GPIO_WritePin(Car_Motor_4P1_GPIO_Port, Car_Motor_4P1_Pin, GPIO_PIN_SET);
+                osDelay(10);
+            }
+            // 没有按下任何按键的时候，需要将所有IO全部放置于0
+            if (SYS->Remote_use_data.key == 0) {
+                HAL_GPIO_WritePin(Car_Motor_1IN1_GPIO_Port, Car_Motor_1IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_1IN2_GPIO_Port, Car_Motor_1IN2_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_2IN1_GPIO_Port, Car_Motor_2IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_2IN2_GPIO_Port, Car_Motor_2IN2_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_3IN1_GPIO_Port, Car_Motor_3IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_3IN2_GPIO_Port, Car_Motor_3IN2_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_4IN1_GPIO_Port, Car_Motor_4IN1_Pin, GPIO_PIN_RESET);
+                HAL_GPIO_WritePin(Car_Motor_4IN2_GPIO_Port, Car_Motor_4IN2_Pin, GPIO_PIN_RESET);
+                osDelay(5);
+            }
+
             break;
         default:
             break;
@@ -212,7 +344,7 @@ void remote_control_robot(SYS_USE_DATA *SYS)
         SYS->Robot_use_data.Motor_Mod = Robot_Mod_NULL;
     }
     if (strcmp(SYS->Remote_use_data.str, "PLAY") == 0) {
-        // 启动小车移动控制模式（这个需要4通道控制）
+        // 启动小车移动控制模式（这个需要4个通道控制）
         SYS->Robot_use_data.Motor_Mod = Robot_Mod_Move;
     }
     if (strcmp(SYS->Remote_use_data.str, "1") == 0) {
@@ -245,6 +377,10 @@ void remote_control_robot(SYS_USE_DATA *SYS)
             break;
         case Robot_Mod_Motor3:
             Infrared_directional_button_detection(SYS, 3);
+            break;
+        case Robot_Mod_Move:
+            // 现在是进行小车底盘控制
+            Infrared_directional_button_detection(SYS, 4);
             break;
         case Robot_Mod_NULL:
             // 空模式这里目前什么都不执行
